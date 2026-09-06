@@ -14,7 +14,6 @@ I am currently doing undergraduate research under the supervision of Wei Ju, Ass
 
 Publications
 ======
-Publications
 *Under submission / In preparation*
 
 
