@@ -12,5 +12,9 @@ My research interests include Large Language Models, Graph Neural Networks, and 
 
 I am currently doing undergraduate research under the supervision of Wei Ju, Associate Professor(副研究员) in the School of Artificial Intelligence, Sichuan University.
 
+Publications
+======
+Publications
+*Under submission / In preparation*
 
 
