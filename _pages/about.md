@@ -7,7 +7,7 @@ redirect_from:
   - /about.html
 ---
 
-I am Zhouhu Tan（谭周湖）, an undergraduate student majoring in Electronic and Information Engineering at Sichuan University(SCU).
+I am Zhouhu Tan（谭周湖）, an undergraduate student majoring in Electronic and Information Engineering at Sichuan University (SCU).
 My current research interests include Large Language Models, Graph Neural Networks, and AI for Science.
 I also maintain broad interests in reinforcement learning, computer vision, and embodied intelligence for future exploration.
 
