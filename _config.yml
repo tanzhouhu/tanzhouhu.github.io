@@ -12,7 +12,7 @@ site_theme               : "air" # The available themes options are "default", "
 title                    : "Zhouhu Tan"
 title_separator          : "-"
 name                     : &name "Zhouhu Tan"
-description              : &description "Undergraduate, Electronic Information Engineering | AI research | Sichuan University"   # Update this with a general description of your site, this is the default if not overridden by a page
+description              : &description "Undergraduate | Electronic Information Engineering | AI research "   # Update this with a general description of your site, this is the default if not overridden by a page
 url                      : https://tanzhouhu.github.io # The base hostname & protocol for your site e.g. "https://[your GitHub username].github.io",
                                                            # or if you already have some other page hosted on Github then use "https://[your GitHub username].github.io/[Your Repo Name]"
 baseurl                  : "" # the subpath of your site, e.g. "/blog"
@@ -26,7 +26,7 @@ author:
   avatar           : "profile.jpg"
   name             : "Zhohu Tan"
   pronouns         : # example: "she/her"  
-  bio              : "Undergraduate, Electronic Information Engineering | AI research | Sichuan University"
+  bio              : "Undergraduate | Electronic Information Engineering | AI research "
   location         : "Chengdu, China"
   employer         : "Sichuan University"
   uri              : # URL
