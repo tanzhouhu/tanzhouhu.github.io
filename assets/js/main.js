@@ -1,4 +1,6 @@
-/* Zhouhu Tan — homepage interactions */
+/* Zhouhu Tan — homepage interactions
+   页面交互脚本：主题切换、手机菜单、滚动动效、导航高亮、页脚年份。
+   一般改内容不需要动这个文件；改坏了刷新页面没动画/按钮失灵就 git checkout 恢复。 */
 
 (function () {
   "use strict";

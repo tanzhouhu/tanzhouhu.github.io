@@ -1,6 +1,16 @@
 /* =========================================================
    Zhouhu Tan — personal homepage
    Editorial academic style · white / orange / gray
+
+   ===== 样式修改指南（改这里最常动的几处）=====
+   1. 配色：下面 :root 里的变量，改 --accent 就能换主题色；
+      深色模式是再往下的 html.dark { ... }，两边最好一起改
+   2. 字号：body 是正文大小；.hero-name 是首页大名字；
+      .section-title 是每个板块的大标题
+   3. 各板块样式按注释分块（nav / hero / about / research / news ...），
+      搜板块名就能找到
+   4. 文件末尾的 @media 是手机端适配，没把握别动
+   5. 改完保存、浏览器强刷（Ctrl+F5）看效果
    ========================================================= */
 
 :root {

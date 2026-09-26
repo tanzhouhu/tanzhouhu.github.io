@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<!--
+  ============================ CV 页修改指南 ============================
+  这是简历页，结构和主页（../index.html）类似：
+
+  1. 板块顺序：Education / Research / Experience / Publications / Contact
+     （当前没有论文，Publications 板块暂时移除了；要恢复见下方注释里的模板）
+  2. 每个板块是一段 <section class="cv-section">，加板块就整段复制
+  3. 板块内部：.cv-block 是一段经历，.cv-meta 是灰色小字（时间/导师），<ul> 是要点
+  4. 时间写法：用 Present / Freshman year 这类相对表述，不要写入学年份
+  5. 这里引用的是 ../assets/... 的样式和脚本（多了个 ../，因为页面在 cv/ 子目录）
+  ======================================================================
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +22,7 @@
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
   <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|newsreader:400,500,600,700,700i" rel="stylesheet" />
   <link rel="stylesheet" href="../assets/css/main.css" />
+  <!-- 渲染前套用深色主题，防止闪白/闪黑。别删 -->
   <script>
     (function () {
       try {
@@ -24,6 +37,7 @@
 <body>
   <div class="top-rule" aria-hidden="true"></div>
 
+  <!-- 顶部导航：链接指回主页各板块（../#xxx） -->
   <header class="nav">
     <div class="nav-inner">
       <a class="nav-brand" href="../">Zhouhu Tan<i>.</i></a>
@@ -49,6 +63,7 @@
 
   <main class="cv-page">
     <div class="container">
+      <!-- 页头：标题 + 一行简介 + 两个快捷链接 -->
       <header class="cv-header reveal">
         <h1>Curriculum Vitae</h1>
         <p>Zhouhu Tan · 谭周湖 — Undergraduate, Sichuan University</p>
@@ -58,6 +73,7 @@
         </div>
       </header>
 
+      <!-- ===== Education ===== -->
       <section class="cv-section reveal">
         <h2>Education</h2>
         <div>
@@ -71,6 +87,7 @@
         </div>
       </section>
 
+      <!-- ===== Research ===== 改方向就改 <li>，加方向就复制一行 -->
       <section class="cv-section reveal">
         <h2>Research</h2>
         <div>
@@ -83,6 +100,7 @@
         </div>
       </section>
 
+      <!-- ===== Experience ===== 一段经历 = 一个 .cv-block，加经历就整段复制 -->
       <section class="cv-section reveal">
         <h2>Experience</h2>
         <div>
@@ -98,6 +116,14 @@
         </div>
       </section>
 
+      <!-- ===== Publications（当前暂无论文，整块先移除了）
+           有论文后，在 Contact 板块前面插入这样的板块：
+
+             section.cv-section 里 h2 写 Publications
+             div 里放 .cv-block：h3 论文标题，p.cv-meta 作者 · 会议，年份，ul 里写要点
+      -->
+
+      <!-- ===== Contact ===== -->
       <section class="cv-section reveal">
         <h2>Contact</h2>
         <div>
@@ -111,6 +137,7 @@
     </div>
   </main>
 
+  <!-- 页脚：年份由 main.js 自动填当前年，不用手改 -->
   <footer class="footer">
     <div class="container footer-inner">
       <p class="footer-copy">
