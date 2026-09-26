@@ -39,7 +39,7 @@ images/             # 头像 profile.jpg 和浏览器图标 favicon
 </li>
 ```
 
-时间用相对表述（Now / Freshman year / Present），**不要写入学年份**。
+时间用相对表述（Now / Freshman year / Present）。
 
 ### 换头像
 
