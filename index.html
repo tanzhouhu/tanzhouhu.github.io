@@ -44,6 +44,8 @@
         }
       } catch (e) {}
     })();
+    /* 首帧前标记 JS 可用：hero 打字机据此决定初始隐藏态，JS 未执行时文字保持可见 */
+    document.documentElement.dataset.js = "1";
   </script>
 </head>
 <body>
@@ -81,50 +83,63 @@
 
   <main>
     <!-- ===== Hero（首屏大图）=====
-         改这里：小标签、中英文名字、专业学校、一句话简介、快捷链接 -->
+         改这里：小标签、中英文名字、专业学校、一句话简介、快捷链接
+         打字内容写在 .type-sizer 里；横幅粒子拼的字在 main.js 的 TEXT 变量 -->
     <section class="hero" id="hero">
-      <div class="container hero-grid">
-        <div class="hero-text reveal">
-          <p class="hero-eyebrow">Undergraduate · AI Research</p>
-          <!-- 大名字后面的 .hero-name-zh 是中文小字，不要删 -->
-          <h1 class="hero-name">
-            Zhouhu Tan
-            <span class="hero-name-zh">谭周湖</span>
-          </h1>
-          <p class="hero-title">
-            Electronic and Information Engineering,
-            <span>Sichuan University</span>
-          </p>
-          <p class="hero-desc">
-            I work on <strong>Large Language Models</strong>, <strong>Graph Neural Networks</strong>,
-            and <strong>AI for Science</strong> — building models that understand structure, language,
-            and the physical world.
-          </p>
-          <!-- 快捷链接：加链接就复制一段 <a>...</a>（里面的 svg 是右上角小箭头图标，保留即可）
-               站内链接（如 cv/）不用 target；站外链接保留 target="_blank" rel="noopener" -->
-          <div class="hero-links">
-            <a href="mailto:tanzhouhu@stu.scu.edu.cn">
-              Email
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
-            </a>
-            <a href="https://github.com/tanzhouhu" target="_blank" rel="noopener">
-              GitHub
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
-            </a>
-            <a href="cv/">
-              Curriculum Vitae
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
-            </a>
-          </div>
+      <div class="container hero-inner">
+        <p class="hero-eyebrow">Undergraduate · AI Research</p>
+        <!-- 大名字后面的 .hero-name-zh 是中文小字，不要删 -->
+        <h1 class="hero-name">
+          <span class="type-slot">
+            <span class="type-sizer">Hello, I&#x27;m Zhouhu Tan</span>
+            <span class="type-out" aria-hidden="true"></span>
+          </span>
+          <span class="hero-name-zh">谭周湖</span>
+        </h1>
+        <p class="hero-title">
+          <span class="type-slot">
+            <span class="type-sizer">Electronic and Information Engineering, Sichuan University</span>
+            <span class="type-out" aria-hidden="true"></span>
+          </span>
+        </p>
+        <p class="hero-desc">
+          I work on <strong>Large Language Models</strong>, <strong>Graph Neural Networks</strong>,
+          and <strong>AI for Science</strong> — building models that understand structure, language,
+          and the physical world.
+        </p>
+        <p class="hero-desc no-margin-top">
+          Prospective collaborators are welcome to contact me at the email address below.
+        </p>
+        <!-- 快捷链接：加链接就复制一段 <a>...</a>
+             站内链接（如 cv/）不用 target；站外链接保留 target="_blank" rel="noopener" -->
+        <div class="hero-links">
+          <a class="hero-btn hero-btn-solid" href="mailto:tanzhouhu@stu.scu.edu.cn">
+            <span>Email</span>
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
+          </a>
+          <a class="hero-btn" href="https://github.com/tanzhouhu" target="_blank" rel="noopener">
+            <span>GitHub</span>
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
+          </a>
+          <a class="hero-btn" href="cv/">
+            <span>Curriculum Vitae</span>
+            <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
+          </a>
         </div>
+      </div>
 
-        <!-- 头像：换图直接覆盖 images/profile.jpg（建议 1200×900 横图）
-             width/height 属性要和图片真实尺寸一致，防止加载时页面抖动 -->
-        <div class="hero-visual reveal" data-delay="140">
-          <div class="portrait-frame">
-            <img class="portrait" src="images/profile.jpg" alt="Portrait of Zhouhu Tan" width="1200" height="900" />
-            <p class="portrait-caption">Chengdu · Sichuan University</p>
-          </div>
+      <!-- 大横幅：背景视频（蝴蝶断片）+ 粒子拼成的名字，鼠标靠近粒子会被推开 -->
+      <div class="hero-banner-wrap">
+        <div class="hero-banner">
+          <video class="hero-banner-video" autoplay muted playsinline loop
+                 preload="auto" aria-hidden="true">
+            <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
+          </video>
+          <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>
+          <a class="hero-banner-btn" href="#research">
+            Explore Research
+            <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
+          </a>
         </div>
       </div>
     </section>
@@ -148,14 +163,13 @@
           <p>
             I am <strong>Zhouhu Tan (谭周湖)</strong>, an undergraduate majoring in
             <strong>Electronic and Information Engineering</strong> at
-            <strong>Sichuan University</strong>. My research interests center on Large Language
-            Models, Graph Neural Networks, and AI for Science.
+            <strong>Sichuan University</strong>. My research interests center on <strong>Large Language
+            Models</strong>,<strong>Graph Neural Networks</strong>, and <strong>AI for Science</strong>.
           </p>
           <p>
-            I also keep a broad eye on reinforcement learning, computer vision, and embodied AI.
-            I conduct undergraduate research under the supervision of
-            <strong>Prof. Wei Ju (琚玮)</strong>, Associate Professor at the School of Artificial
-            Intelligence, Sichuan University.
+            I also keep a broad eye on <strong>reinforcement learning</strong>, <strong>computer vision</strong>, and <strong>embodied AI</strong>.
+            Currently, I am actively involved in undergraduate research under the supervision of <strong>Associate Professor Wei Ju(琚玮) from the School of
+            Artificial Intelligence, Sichuan University</strong>, and collaborate with <strong>Dr. Hengchuang Yin(尹衡闯) from the Chinese Academy of Sciences</strong> on related research projects.
           </p>
 
           <!-- 词条表：一行一个 <li>。加一行就复制一段，.k 是标签名，.v 是内容 -->
@@ -163,18 +177,22 @@
             <li>
               <span class="k">Institution</span>
               <span class="v">Sichuan University</span>
+              <span class="doodle" aria-hidden="true"><img src="images/doodles/standard.svg" alt="" /></span>
             </li>
             <li>
               <span class="k">Advisor</span>
-              <span class="v">Prof. Wei Ju · 琚玮</span>
+              <span class="v">Assoc. Prof. Wei Ju · 琚玮 and Dr. Hengchuang Yin· 尹衡闯</span>
+              <span class="doodle" aria-hidden="true"><img src="images/doodles/lite.svg" alt="" /></span>
             </li>
             <li>
               <span class="k">Location</span>
               <span class="v">Chengdu, China</span>
+              <span class="doodle" aria-hidden="true"><img src="images/doodles/pro.svg" alt="" /></span>
             </li>
             <li>
               <span class="k">Focus</span>
               <span class="v">LLM · GNN · AI for Science</span>
+              <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
             </li>
           </ul>
         </div>
@@ -216,6 +234,8 @@
               <li>Alignment</li>
               <li>Representation</li>
             </ul>
+            <!-- 手绘图案：悬停/点击本条目时浮现 -->
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/lite.svg" alt="" /></span>
           </li>
 
           <li class="research-item reveal" data-delay="80">
@@ -234,6 +254,7 @@
               <li>Structure</li>
               <li>Representation</li>
             </ul>
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/pro.svg" alt="" /></span>
           </li>
 
           <li class="research-item reveal" data-delay="160">
@@ -252,6 +273,7 @@
               <li>Multi-modal</li>
               <li>Modeling</li>
             </ul>
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
           </li>
 
           <li class="research-item reveal" data-delay="240">
@@ -270,6 +292,7 @@
               <li>CV</li>
               <li>EAI</li>
             </ul>
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/standard.svg" alt="" /></span>
           </li>
         </ul>
       </div>
@@ -306,20 +329,22 @@
             <div class="news-body">
               <h3>Undergraduate research</h3>
               <p>
-                Working with Prof. Wei Ju (琚玮) at the School of Artificial Intelligence, SCU —
-                focusing on large language models and graph learning.
+               collaborating with Dr. Hengchuang Yin from the Chinese Academy of Sciences on multimodal mosaic imputation.
+          </p>
               </p>
             </div>
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
           </li>
           <li class="news-item reveal" data-delay="90">
             <div class="news-date">Freshman year</div>
             <div class="news-body">
               <h3>Started research early</h3>
               <p>
-                Reached out to Prof. Wei Ju in the spring semester of my freshman year and began
+                Reached out to Assoc. Prof. Wei Ju in the spring semester of my freshman year and began
                 undergraduate research.
               </p>
             </div>
+            <span class="doodle" aria-hidden="true"><img src="images/doodles/lite.svg" alt="" /></span>
           </li>
         </ul>
       </div>

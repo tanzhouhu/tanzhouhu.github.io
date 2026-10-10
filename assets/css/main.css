@@ -203,18 +203,83 @@ html.dark .icon-sun { display: none; }
 
 /* ---------- hero ---------- */
 .hero {
-  padding: 72px 0 64px;
+  position: relative;
+  padding: 56px 0 0;
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
-  gap: 64px;
-  align-items: start;
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+}
+
+/* 打字机：type-sizer 占位撑开行宽，type-out 是逐字打出来的内容（JS 填） */
+.type-slot {
+  display: inline-grid;
+  vertical-align: baseline;
+}
+
+.type-slot > * {
+  grid-area: 1 / 1;
+}
+
+.type-sizer {
+  visibility: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* JS 未执行时直接显示原文，保证无脚本也能读 */
+html:not([data-js]) .type-sizer {
+  visibility: visible;
+}
+
+html:not([data-js]) .type-out {
+  display: none;
+}
+
+.type-out .cursor {
+  display: inline-block;
+  width: 3px;
+  height: 0.85em;
+  margin-left: 4px;
+  background: var(--ink);
+  vertical-align: baseline;
+  animation: cursor-blink 1s step-end infinite;
+}
+
+.type-out .hold-underscore {
+  animation: cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 首屏文字分层浮现（typing 完成后由 main.js 加 .is-in） */
+html[data-js] .hero-eyebrow,
+html[data-js] .hero-desc,
+html[data-js] .hero-links,
+html[data-js] .hero-banner-wrap {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html[data-js] .hero-eyebrow.is-in,
+html[data-js] .hero-desc.is-in,
+html[data-js] .hero-links.is-in,
+html[data-js] .hero-banner-wrap.is-in {
+  opacity: 1;
+  transform: none;
 }
 
 .hero-eyebrow {
-  margin: 0 0 22px;
+  margin: 0 0 26px;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.18em;
@@ -224,18 +289,25 @@ html.dark .icon-sun { display: none; }
 
 .hero-name {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: clamp(2.55rem, 5.2vw, 4.15rem);
-  line-height: 1.04;
-  letter-spacing: -0.03em;
-  font-weight: 500;
+  /* 仿 mimo 打字机：Georgia 衬线、48px 常规字重、行高 49px */
+  font-family: Georgia, "Times New Roman", var(--font-serif), serif;
+  font-size: clamp(1.9rem, 5vw, 3rem);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  font-weight: 400;
+}
+
+.hero-name .type-slot,
+.hero-title .type-slot {
+  display: inline-grid;
+  vertical-align: baseline;
 }
 
 .hero-name-zh {
   display: inline-block;
-  margin-left: 14px;
+  margin-left: 16px;
   font-family: var(--font-sans);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-weight: 500;
   letter-spacing: 0.28em;
   color: var(--ink-3);
@@ -244,104 +316,151 @@ html.dark .icon-sun { display: none; }
 
 .hero-title {
   margin: 22px 0 0;
-  font-size: 1.12rem;
-  line-height: 1.55;
-  font-weight: 500;
-  color: var(--ink);
-  max-width: 34ch;
+  /* 比名字小一号，mimo 副标题的层次 */
+  font-family: Georgia, "Times New Roman", var(--font-serif), serif;
+  font-size: clamp(1.25rem, 2.8vw, 1.85rem);
+  line-height: 1.25;
+  font-weight: 400;
+  color: var(--ink-2);
+  /* 放宽到一行：这句比 mimo 的副标题长，36ch 会在桌面端折行 */
+  max-width: 58ch;
 }
 
-.hero-title span {
+.hero-title .muted {
   color: var(--ink-3);
-  font-weight: 400;
 }
 
 .hero-desc {
-  margin: 18px 0 0;
-  max-width: 52ch;
+  margin: 22px 0 0;
+  max-width: 56ch;
   color: var(--ink-2);
-  font-size: 1.02rem;
+  /* 与打字机同款衬线，跟 mimo 正文一个味道 */
+  font-family: Georgia, "Times New Roman", var(--font-serif), serif;
+  font-size: 1.12rem;
+  line-height: 1.7;
 }
 
+.hero-desc strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.hero-desc.no-margin-top {
+  margin-top: 0;
+}
+
+/* 胶囊按钮（仿 mimo 的 hero 按钮） */
 .hero-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 28px;
-  margin-top: 38px;
-  padding-top: 28px;
-  border-top: 1px solid var(--hair);
+  justify-content: center;
+  gap: 12px 14px;
+  margin-top: 34px;
 }
 
-.hero-links a {
-  font-size: 0.94rem;
-  font-weight: 550;
-  color: var(--ink);
+.hero-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding-bottom: 2px;
-  border-bottom: 1.5px solid transparent;
-  transition: color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
+  padding: 11px 22px;
+  font-size: 0.94rem;
+  font-weight: 550;
+  color: var(--ink);
+  border: 1px solid var(--hair-strong);
+  border-radius: 999px;
+  background: transparent;
+  transition: color 0.22s ease, border-color 0.22s ease,
+    background-color 0.22s ease, transform 0.22s ease, gap 0.22s ease;
 }
 
-.hero-links a:hover {
+.hero-btn:hover {
   color: var(--accent);
-  border-bottom-color: var(--accent);
+  border-color: var(--accent);
   gap: 12px;
 }
 
-.hero-links a svg {
-  width: 15px;
-  height: 15px;
-  opacity: 0.75;
+.hero-btn svg {
+  flex: none;
+  opacity: 0.8;
 }
 
-/* portrait */
-.hero-visual {
-  padding-top: 12px;
+.hero-btn-solid {
+  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
 }
 
-.portrait-frame {
-  position: relative;
-  width: min(100%, 300px);
-  margin-left: auto;
-  margin-right: 8px;
-}
-
-.portrait-frame::before {
-  content: "";
-  position: absolute;
-  inset: 14px -14px -14px 14px;
-  border: 1px solid var(--hair-strong);
-  z-index: 0;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.3s ease;
-}
-
-.portrait-frame:hover::before {
-  transform: translate(-5px, -5px);
+.hero-btn-solid:hover {
+  color: #fff;
+  background: var(--accent);
   border-color: var(--accent);
 }
 
-.portrait {
+/* 大横幅：浅灰圆角底 + 粒子画布 */
+.hero-banner-wrap {
+  width: min(100% - 48px, var(--w));
+  margin: 56px auto 0;
+  padding-bottom: 8px;
+}
+
+.hero-banner {
   position: relative;
-  z-index: 1;
   width: 100%;
-  height: auto;
-  object-fit: contain;
-  filter: grayscale(12%);
-  transition: filter 0.45s ease;
+  height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--hair);
 }
 
-.portrait-frame:hover .portrait {
-  filter: grayscale(0%);
+.hero-banner-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
 }
 
-.portrait-caption {
-  margin: 18px 2px 0;
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  color: var(--ink-3);
-  text-align: right;
+.hero-banner-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.hero-banner-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, gap 0.2s ease;
+}
+
+html.dark .hero-banner-btn {
+  background: rgba(18, 18, 18, 0.6);
+}
+
+.hero-banner-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  gap: 11px;
 }
 
 /* ---------- shared section chrome ---------- */
@@ -691,6 +810,24 @@ html.dark .icon-sun { display: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .reveal { opacity: 1; transform: none; transition: none; }
+  /* 手绘图案不做浮现动画，直接显示 */
+  .doodle,
+  .doodle svg,
+  .doodle img { transition: none; }
+  .doodle svg,
+  .doodle img { transform: none; }
+  /* 打字机/渐入也直接显示 */
+  html[data-js] .hero-eyebrow,
+  html[data-js] .hero-desc,
+  html[data-js] .hero-links,
+  html[data-js] .hero-banner-wrap {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .type-out .cursor,
+  .type-out .hold-underscore { animation: none; opacity: 1; }
+  /* 画布保留：JS 会把粒子直接放到终点，静态显示拼好的字 */
 }
 
 /* ---------- CV page ---------- */
@@ -840,23 +977,111 @@ html.dark .icon-sun { display: none; }
   border-bottom-color: var(--accent);
 }
 
+/* ---------- 手绘图案（悬停 / 点击浮现）----------
+   结构：在模块里放一个 <span class="doodle"><svg>...</svg></span>
+   原理：默认透明 + 微缩；悬停（电脑）或点击（手机，由 main.js 加 .is-tapped）时
+        透明度回升 + 从 0.9 放大到 1，图案像"浮现"出来。
+   颜色：主体用 currentColor（浅色模式近黑、深色模式近白），核心用 --accent 橙色。 */
+.doodle {
+  position: absolute;
+  z-index: 2;
+  opacity: 0;
+  color: var(--ink);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.doodle svg,
+.doodle img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: scale(0.9);
+  transform-origin: 50% 50%;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 各模块里的摆放位置（图案 viewBox 123x80，横向）*/
+.research-item .doodle {
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 106px;
+  height: 69px;
+}
+
+.news-item {
+  position: relative;
+}
+
+.news-item .doodle {
+  right: 2px;
+  top: 12px;
+  width: 130px;
+  height: 84px;
+}
+
+.meta-list li {
+  position: relative;
+}
+
+.meta-list li .doodle {
+  right: -2px;
+  top: 50%;
+  margin-top: -21px;
+  width: 66px;
+  height: 43px;
+}
+
+/* 电脑端：悬停触发 */
+@media (hover: hover) and (pointer: fine) {
+  .research-item:hover .doodle,
+  .news-item:hover .doodle,
+  .meta-list li:hover .doodle {
+    opacity: 1;
+  }
+
+  .research-item:hover .doodle svg,
+  .news-item:hover .doodle svg,
+  .meta-list li:hover .doodle svg,
+  .research-item:hover .doodle img,
+  .news-item:hover .doodle img,
+  .meta-list li:hover .doodle img {
+    transform: scale(1);
+  }
+}
+
+/* 手机端：点击/触摸触发（main.js 会给模块加 .is-tapped，1.6 秒后移除） */
+.research-item.is-tapped .doodle,
+.news-item.is-tapped .doodle,
+.meta-list li.is-tapped .doodle {
+  opacity: 1;
+}
+
+.research-item.is-tapped .doodle svg,
+.news-item.is-tapped .doodle svg,
+.meta-list li.is-tapped .doodle svg,
+.research-item.is-tapped .doodle img,
+.news-item.is-tapped .doodle img,
+.meta-list li.is-tapped .doodle img {
+  transform: scale(1);
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {
   .hero {
-    padding: 64px 0 56px;
+    padding: 48px 0 0;
   }
 
-  .hero-grid {
-    grid-template-columns: 1fr;
-    gap: 48px;
+  .hero-banner-wrap {
+    margin-top: 44px;
   }
 
-  .portrait-frame {
-    margin-left: 0;
-    width: min(70%, 280px);
+  .hero-banner {
+    height: 340px;
+    border-radius: 18px;
   }
-
-  .portrait-caption { text-align: left; }
 
   .split {
     grid-template-columns: 1fr;
@@ -875,6 +1100,29 @@ html.dark .icon-sun { display: none; }
   }
 
   .research-tags { grid-column: 2 / -1; }
+
+  /* 窄屏下手绘图案缩小，避免压到文字 */
+  .research-item .doodle {
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 70px;
+    height: 45px;
+  }
+
+  .news-item .doodle {
+    right: 0;
+    top: 10px;
+    width: 84px;
+    height: 55px;
+  }
+
+  .meta-list li .doodle {
+    right: -4px;
+    width: 54px;
+    height: 35px;
+    margin-top: -18px;
+  }
 
   .news-item {
     grid-template-columns: 1fr;
