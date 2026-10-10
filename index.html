@@ -11,7 +11,7 @@
   4. 改配色/字号：assets/css/main.css 最顶上的 :root 变量
   5. 时间写法：用 Now / Freshman year / Present 这类相对表述
   6. 换横幅视频：覆盖 videos/hero-banner-v5.mp4（mp4 格式，建议 1920×1080，几秒的短片，
-     进入页面播一次停在最后一帧，不要加 loop）
+     每次滚动到横幅会从头播一次然后停在最后一帧，不要加 loop）
      横幅上粒子拼的名字在 assets/js/main.js 搜 TEXT 就能改
   7. 换手绘图案：images/doodles/ 里四个 svg（羽毛/流星/土星/星系），
      换图就替换同名文件，或改条目里 <img src="images/doodles/xxx.svg">
@@ -134,6 +134,7 @@
       </div>
 
       <!-- 大横幅：背景视频 + 粒子拼成的名字
+           视频行为：每次滚动到横幅就从头播一遍，播完停在最后一帧（main.js 控制）
            换视频：把新 mp4 覆盖 videos/hero-banner-v5.mp4 即可（保持文件名最省事）
            粒子拼的字：去 assets/js/main.js 搜 var TEXT 改那一行
            粒子颜色：同一处的 COLOR_A / COLOR_B，深浅色模式各一组

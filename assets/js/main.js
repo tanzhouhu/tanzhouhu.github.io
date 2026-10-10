@@ -215,6 +215,49 @@
   }
   runHeroTyping();
 
+  /* ---------- 横幅视频：每次进入视野播一遍 ----------
+     滚动到横幅（或切回标签页）就从头播一次，播完停在最后一帧，不循环。
+     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。 */
+  var bannerVideo = document.querySelector(".hero-banner-video");
+  if (bannerVideo) {
+    bannerVideo.loop = false;
+    var videoInView = false;
+
+    function replayBanner() {
+      try {
+        bannerVideo.currentTime = 0;
+        var p = bannerVideo.play();
+        if (p && p.catch) p.catch(function () {});
+      } catch (e) {}
+    }
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            var arrived = entry.isIntersecting && entry.intersectionRatio >= 0.3;
+            if (arrived && !videoInView) {
+              videoInView = true;
+              if (!reduceMotion) replayBanner();
+            } else if (!arrived && videoInView) {
+              videoInView = false;
+              bannerVideo.pause();
+            }
+          });
+        },
+        { threshold: [0, 0.3] }
+      ).observe(bannerVideo);
+    }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        bannerVideo.pause();
+      } else if (videoInView && !reduceMotion) {
+        replayBanner();
+      }
+    });
+  }
+
   /* ---------- 横幅粒子拼字（仿 mimo）----------
      把文字画到离屏画布上采样成粒子，粒子从四周飞入拼成字，
      拼好后轻微漂浮，鼠标靠近会被推开。 */
