@@ -271,7 +271,7 @@
 
   /* ---------- 横幅粒子拼字（仿 mimo）----------
      把文字画到离屏画布上采样成粒子，粒子从四周飞入拼成字，
-     拼好后轻微漂浮，鼠标靠近会被推开。 */
+     拼好后轻微漂浮，鼠标/手指靠近会被推开。 */
   (function heroBannerParticles() {
     var wrap = document.querySelector(".hero-banner");
     var canvas = document.getElementById("heroParticles");
@@ -293,7 +293,11 @@
 
     var particles = [];
     var W = 0, H = 0, dpr = 1;
-    var mouse = { active: false, x: 0, y: 0, sx: 0, sy: 0 };
+    // cx/cy 是屏幕坐标，每帧换算成横幅内坐标；snap 表示刚按下、直接落点别滑过去
+    var mouse = { active: false, cx: 0, cy: 0, x: 0, y: 0, sx: 0, sy: 0, snap: false };
+    // 手指事件比鼠标稀疏，跟手系数加大，不然推开的圈拖在手指后面
+    var isCoarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    var follow = isCoarse ? 0.45 : 0.18;
     var startTime = 0;
     var entering = true;
     var rafId = 0;
@@ -411,8 +415,17 @@
 
     function frame(now) {
       ctx.clearRect(0, 0, W, H);
-      mouse.sx += (mouse.x - mouse.sx) * 0.18;
-      mouse.sy += (mouse.y - mouse.sy) * 0.18;
+      // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
+      var rect = wrap.getBoundingClientRect();
+      mouse.x = mouse.cx - rect.left;
+      mouse.y = mouse.cy - rect.top;
+      if (mouse.snap) {
+        mouse.sx = mouse.x;
+        mouse.sy = mouse.y;
+        mouse.snap = false;
+      }
+      mouse.sx += (mouse.x - mouse.sx) * follow;
+      mouse.sy += (mouse.y - mouse.sy) * follow;
 
       var allDone = true;
       for (var i = 0; i < particles.length; i++) {
@@ -464,18 +477,45 @@
       rafId = requestAnimationFrame(frame);
     }
 
-    function onMove(e) {
-      var rect = wrap.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
+    function setPointer(cx, cy) {
+      mouse.cx = cx;
+      mouse.cy = cy;
       mouse.active = true;
+    }
+    function onMove(e) {
+      // 浏览器会把一次手指滑动的多个采样合并，取出最后那个跟手最准
+      if (e.getCoalescedEvents) {
+        var evts = e.getCoalescedEvents();
+        if (evts && evts.length) {
+          var last = evts[evts.length - 1];
+          setPointer(last.clientX, last.clientY);
+          return;
+        }
+      }
+      setPointer(e.clientX, e.clientY);
+    }
+    function onDown(e) {
+      setPointer(e.clientX, e.clientY);
+      mouse.snap = true;
     }
     function onLeave() {
       mouse.active = false;
     }
 
-    wrap.addEventListener("pointermove", onMove);
+    wrap.addEventListener("pointerdown", onDown);
+    wrap.addEventListener("pointermove", onMove, { passive: true });
     wrap.addEventListener("pointerleave", onLeave);
+    // 鼠标抬起后仍在悬停，不能关；手指没有悬停，抬手就收
+    wrap.addEventListener("pointerup", function (e) {
+      if (e.pointerType !== "mouse") onLeave();
+    });
+    // 手机上一拖动浏览器就去滚动，会发 pointercancel/touchcancel 把 pointer 掐掉；
+    // 这时不关效果，touchmove 继续跟，否则粒子圈走到一半突然停住。只有真抬手才收。
+    wrap.addEventListener("touchmove", function (e) {
+      var t = e.touches && e.touches[0];
+      if (t) setPointer(t.clientX, t.clientY);
+    }, { passive: true });
+    wrap.addEventListener("touchend", onLeave, { passive: true });
 
     var resizeTimer = 0;
     window.addEventListener("resize", function () {

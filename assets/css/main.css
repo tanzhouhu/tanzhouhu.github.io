@@ -434,6 +434,8 @@ html[data-js] .hero-banner-wrap.is-in {
   overflow: hidden;
   background: var(--bg-soft);
   border: 1px solid var(--hair);
+  /* 手指划着推粒子时别让浏览器先判定滚动，左右立刻跟手；上下仍可滚页面 */
+  touch-action: pan-y;
 }
 
 .hero-banner-video {
