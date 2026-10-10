@@ -408,13 +408,14 @@ html[data-js] .hero-banner-wrap.is-in {
 }
 
 .hero-btn-solid {
-  color: #fff;
+  /* 跟底色走：白天是深底白字，黑夜是浅底深字（写死 #fff 会白底白字） */
+  color: var(--bg);
   background: var(--ink);
   border-color: var(--ink);
 }
 
 .hero-btn-solid:hover {
-  color: #fff;
+  color: var(--bg);
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -1010,7 +1011,10 @@ html.dark .hero-banner-btn {
    原理：默认透明 + 微缩；悬停（电脑）或点击（手机，由 main.js 加 .is-tapped）时
         透明度回升 + 从 0.9 放大到 1，图案像"浮现"出来。
    想改大小：改下面 research / news / meta-list 三处的 width/height。
-   不想要某处图案：把 HTML 里那一行 <span class="doodle">...</span> 删掉即可。 */
+   不想要某处图案：把 HTML 里那一行 <span class="doodle">...</span> 删掉即可。
+   黑夜模式：SVG 里的线条是给白天画的黑色，深底上会隐形；
+        下面 html.dark 几行自动换用同目录 *-dark.svg（黑线改浅色）。
+        新增图案时记得照着做一份 -dark.svg，否则黑夜看不见。 */
 .doodle {
   position: absolute;
   z-index: 2;
@@ -1029,6 +1033,20 @@ html.dark .hero-banner-btn {
   transform: scale(0.9);
   transform-origin: 50% 50%;
   transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 黑夜换深色版图案（路径相对于本 css 文件） */
+html.dark .doodle img[src$="lite.svg"] {
+  content: url("../../images/doodles/lite-dark.svg");
+}
+html.dark .doodle img[src$="standard.svg"] {
+  content: url("../../images/doodles/standard-dark.svg");
+}
+html.dark .doodle img[src$="pro.svg"] {
+  content: url("../../images/doodles/pro-dark.svg");
+}
+html.dark .doodle img[src$="max.svg"] {
+  content: url("../../images/doodles/max-dark.svg");
 }
 
 /* 各模块里的摆放位置（图案 viewBox 123x80，横向）*/
