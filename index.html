@@ -134,14 +134,14 @@
       </div>
 
       <!-- 大横幅：背景视频 + 粒子拼成的名字
-           视频行为：每次滚动到横幅就从头播一遍，播完停在最后一帧（main.js 控制）
+           视频行为：滑到横幅才开始播（进页不自动播），每次进入视野从头播一遍，停在最后一帧
            换视频：把新 mp4 覆盖 videos/hero-banner-v5.mp4 即可（保持文件名最省事）
            粒子拼的字：去 assets/js/main.js 搜 var TEXT 改那一行
            粒子颜色：同一处的 COLOR_A / COLOR_B，深浅色模式各一组
            下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
-          <video class="hero-banner-video" autoplay muted playsinline
+          <video class="hero-banner-video" muted playsinline
                  preload="auto" aria-hidden="true">
             <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
           </video>

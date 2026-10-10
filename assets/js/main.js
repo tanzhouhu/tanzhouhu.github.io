@@ -123,6 +123,8 @@
      .type-sizer 里是原文，.type-out 逐字打出来；打完后给下面几层加 .is-in 浮现。
      没有 JS 时 CSS 会直接显示原文，无障碍阅读器读的也是原文。 */
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // 打字全部结束后置 true，横幅视频等这个开关才播
+  var heroTypingDone = false;
 
   function typeLine(slot, speed, done, holdEnd) {
     var out = slot.querySelector(".type-out");
@@ -167,6 +169,8 @@
     var slots = document.querySelectorAll(".hero .type-slot");
     var after = document.querySelectorAll(".hero-desc, .hero-links, .hero-banner-wrap");
     function showRest() {
+      heroTypingDone = true;
+      if (window._tryPlayBanner) window._tryPlayBanner();
       Array.prototype.forEach.call(after, function (el, i) {
         setTimeout(function () {
           el.classList.add("is-in");
@@ -215,8 +219,9 @@
   }
   runHeroTyping();
 
-  /* ---------- 横幅视频：每次进入视野播一遍 ----------
-     滚动到横幅（或切回标签页）就从头播一次，播完停在最后一帧，不循环。
+  /* ---------- 横幅视频：文字打完 + 滑到横幅才播 ----------
+     进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
+     之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
      想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。 */
   var bannerVideo = document.querySelector(".hero-banner-video");
   if (bannerVideo) {
@@ -231,6 +236,12 @@
       } catch (e) {}
     }
 
+    // 满足「打字完 + 在视野里」才播；打字收尾时会调到这里
+    function tryPlayBanner() {
+      if (videoInView && heroTypingDone && !reduceMotion) replayBanner();
+    }
+    window._tryPlayBanner = tryPlayBanner;
+
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         function (entries) {
@@ -238,7 +249,7 @@
             var arrived = entry.isIntersecting && entry.intersectionRatio >= 0.3;
             if (arrived && !videoInView) {
               videoInView = true;
-              if (!reduceMotion) replayBanner();
+              tryPlayBanner();
             } else if (!arrived && videoInView) {
               videoInView = false;
               bannerVideo.pause();
@@ -252,8 +263,8 @@
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) {
         bannerVideo.pause();
-      } else if (videoInView && !reduceMotion) {
-        replayBanner();
+      } else {
+        tryPlayBanner();
       }
     });
   }
