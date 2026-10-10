@@ -194,21 +194,29 @@
       }, 120);
     }
     function begin() {
-      // mimo 节奏：起手等 300ms，第一行 50ms/字，行间隔 120ms，第二行 60ms/字
+      // mimo 节奏：起手等 300ms，名字 50ms/字，行间隔 120ms，中文名/副标题 60ms/字
       setTimeout(function () {
         typeLine(slots[0], 50, function () {
-          // 第一行打完横幅就出来，粒子立刻开始飞入
+          // 名字打完横幅就出来，粒子立刻开始飞入
           var bannerWrapEarly = document.querySelector(".hero-banner-wrap");
           if (bannerWrapEarly) bannerWrapEarly.classList.add("is-in");
-          if (slots[1]) {
-            setTimeout(function () {
-              typeLine(slots[1], 60, showRest, true);
-            }, 120);
-          } else {
-            showRest();
-          }
+          typeNext(1);
         });
       }, 300);
+    }
+    // 后面几个 type-slot 依次打（谭周湖、副标题…），最后一行打完停在闪烁下划线
+    function typeNext(i) {
+      if (i >= slots.length) {
+        showRest();
+        return;
+      }
+      var isLast = i === slots.length - 1;
+      setTimeout(function () {
+        typeLine(slots[i], 60, function () {
+          if (isLast) showRest();
+          else typeNext(i + 1);
+        }, isLast);
+      }, 120);
     }
     // 字体就位再打，避免字宽跳动
     if (document.fonts && document.fonts.ready) {
