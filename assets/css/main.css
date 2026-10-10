@@ -462,12 +462,14 @@ html[data-js] .hero-banner-wrap.is-in {
   z-index: 2;
   display: inline-flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 7px;
   padding: 10px 20px;
   font-size: 0.88rem;
   font-weight: 550;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  width: max-content;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--hair);
