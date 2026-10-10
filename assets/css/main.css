@@ -9,8 +9,10 @@
       .section-title 是每个板块的大标题
    3. 各板块样式按注释分块（nav / hero / about / research / news ...），
       搜板块名就能找到
-   4. 文件末尾的 @media 是手机端适配，没把握别动
-   5. 改完保存、浏览器强刷（Ctrl+F5）看效果
+   4. 手绘图案大小：搜 .doodle 一段；research / news / meta-list 三处
+      width/height 各自控制，改数字即可
+   5. 文件末尾的 @media 是手机端适配，没把握别动
+   6. 改完保存、浏览器强刷（Ctrl+F5）看效果
    ========================================================= */
 
 :root {
@@ -50,6 +52,8 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 72px;
   -webkit-text-size-adjust: 100%;
+  /* 手机端防横向滚动条 */
+  overflow-x: clip;
 }
 
 body {
@@ -215,14 +219,32 @@ html.dark .icon-sun { display: none; }
   gap: 0;
 }
 
-/* 打字机：type-sizer 占位撑开行宽，type-out 是逐字打出来的内容（JS 填） */
+/* flex 子项默认 min-width:auto，会跟着内容把页面撑宽，这里统一压住 */
+.hero-inner > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* 文字块必须撑满容器宽度，否则 width:100% 的打字机格子会以内容为准，长句不折行 */
+.hero-name,
+.hero-title,
+.hero-desc {
+  width: 100%;
+}
+
+/* 打字机：type-sizer 占位撑开行宽，type-out 是逐字打出来的内容（JS 填）
+   minmax(0,1fr) 是关键：轨道宽度被限死在容器内，长句才会折行 */
 .type-slot {
   display: inline-grid;
   vertical-align: baseline;
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .type-slot > * {
   grid-area: 1 / 1;
+  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .type-sizer {
@@ -301,6 +323,7 @@ html[data-js] .hero-banner-wrap.is-in {
 .hero-title .type-slot {
   display: inline-grid;
   vertical-align: baseline;
+  max-width: 100%;
 }
 
 .hero-name-zh {
@@ -444,6 +467,7 @@ html[data-js] .hero-banner-wrap.is-in {
   font-size: 0.88rem;
   font-weight: 550;
   letter-spacing: 0.02em;
+  white-space: nowrap;
   color: var(--ink);
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid var(--hair);
@@ -978,10 +1002,11 @@ html.dark .hero-banner-btn {
 }
 
 /* ---------- 手绘图案（悬停 / 点击浮现）----------
-   结构：在模块里放一个 <span class="doodle"><svg>...</svg></span>
+   结构：在模块里放一个 <span class="doodle"><img src="images/doodles/xxx.svg"></span>
    原理：默认透明 + 微缩；悬停（电脑）或点击（手机，由 main.js 加 .is-tapped）时
         透明度回升 + 从 0.9 放大到 1，图案像"浮现"出来。
-   颜色：主体用 currentColor（浅色模式近黑、深色模式近白），核心用 --accent 橙色。 */
+   想改大小：改下面 research / news / meta-list 三处的 width/height。
+   不想要某处图案：把 HTML 里那一行 <span class="doodle">...</span> 删掉即可。 */
 .doodle {
   position: absolute;
   z-index: 2;
@@ -1177,7 +1202,77 @@ html.dark .hero-banner-btn {
     transform: translateY(-6px) rotate(-45deg);
   }
 
-  .hero-name { font-size: clamp(2.7rem, 13vw, 3.6rem); }
+  /* 手机端 Hero：字缩小、间距收紧，别让打字机长句溢出屏幕 */
+  .hero {
+    padding: 32px 0 0;
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 16px;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+  }
+
+  .hero-name {
+    font-size: clamp(1.45rem, 6.2vw, 1.95rem);
+    line-height: 1.15;
+  }
+
+  /* 打字机占位改成块级，宽度跟着屏幕，长句能正常折行 */
+  .hero-name .type-slot,
+  .hero-title .type-slot {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero-name-zh {
+    display: block;
+    margin: 10px 0 0;
+    font-size: 0.82rem;
+    letter-spacing: 0.22em;
+  }
+
+  .hero-title {
+    margin-top: 16px;
+    font-size: clamp(1.02rem, 4.4vw, 1.25rem);
+    line-height: 1.35;
+    max-width: 100%;
+  }
+
+  .hero-desc {
+    margin-top: 16px;
+    font-size: 0.98rem;
+    line-height: 1.65;
+    max-width: 100%;
+  }
+
+  .hero-links {
+    margin-top: 22px;
+    gap: 10px;
+  }
+
+  .hero-btn {
+    padding: 9px 16px;
+    font-size: 0.86rem;
+  }
+
+  .hero-banner-wrap {
+    width: min(100% - 32px, var(--w));
+    margin-top: 28px;
+  }
+
+  .hero-banner {
+    height: 260px;
+    border-radius: 16px;
+  }
+
+  .hero-banner-btn {
+    bottom: 16px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
 
   .meta-list li {
     grid-template-columns: 1fr;

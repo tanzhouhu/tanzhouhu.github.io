@@ -10,7 +10,12 @@
   3. 换头像：把新照片覆盖 images/profile.jpg（建议 1200×900 横图）
   4. 改配色/字号：assets/css/main.css 最顶上的 :root 变量
   5. 时间写法：用 Now / Freshman year / Present 这类相对表述
-  6. 提醒：尖括号标签（<div> 等）不要删，只改文字；文件务必以 UTF-8 保存
+  6. 换横幅视频：覆盖 videos/hero-banner-v5.mp4（mp4 格式，建议 1920×1080，几秒的短片，
+     进入页面播一次停在最后一帧，不要加 loop）
+     横幅上粒子拼的名字在 assets/js/main.js 搜 TEXT 就能改
+  7. 换手绘图案：images/doodles/ 里四个 svg（羽毛/流星/土星/星系），
+     换图就替换同名文件，或改条目里 <img src="images/doodles/xxx.svg">
+  8. 提醒：尖括号标签（<div> 等）不要删，只改文字；文件务必以 UTF-8 保存
   ======================================================================
 -->
 <html lang="en">
@@ -128,10 +133,14 @@
         </div>
       </div>
 
-      <!-- 大横幅：背景视频（蝴蝶断片）+ 粒子拼成的名字，鼠标靠近粒子会被推开 -->
+      <!-- 大横幅：背景视频 + 粒子拼成的名字
+           换视频：把新 mp4 覆盖 videos/hero-banner-v5.mp4 即可（保持文件名最省事）
+           粒子拼的字：去 assets/js/main.js 搜 var TEXT 改那一行
+           粒子颜色：同一处的 COLOR_A / COLOR_B，深浅色模式各一组
+           下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
-          <video class="hero-banner-video" autoplay muted playsinline loop
+          <video class="hero-banner-video" autoplay muted playsinline
                  preload="auto" aria-hidden="true">
             <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
           </video>
@@ -201,7 +210,10 @@
 
     <!-- ===== Research（研究方向）=====
          每个方向是一段 <li class="research-item">，加方向就整段复制粘贴
-         然后依次改：序号 research-idx（01/02/03...）、标题、描述、标签 -->
+         然后依次改：序号 research-idx（01/02/03...）、标题、描述、标签
+         末尾的 <span class="doodle"> 是悬停/点击浮现的手绘图案
+         换图案：改 <img src="images/doodles/xxx.svg"> 里的文件名即可
+         （images/doodles/ 有 lite=羽毛 standard=流星 pro=土星 max=星系） -->
     <section class="section" id="research">
       <div class="container">
         <div class="reveal">
@@ -234,7 +246,8 @@
               <li>Alignment</li>
               <li>Representation</li>
             </ul>
-            <!-- 手绘图案：悬停/点击本条目时浮现 -->
+            <!-- 手绘图案：鼠标悬停（电脑）/ 点击（手机）本条目时浮现
+                 换图就改 src 里的文件名；不想要图案就把这一行整行删掉 -->
             <span class="doodle" aria-hidden="true"><img src="images/doodles/lite.svg" alt="" /></span>
           </li>
 
@@ -307,8 +320,10 @@
                <h3>标题，比如论文被哪个会接收</h3>
                <p>一两句话说明。</p>
              </div>
+             <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
            </li>
 
+         最后那行 doodle 是悬停/点击浮现的图案，可有可无；换图改 src 文件名。
          发论文就加在这里，不用另外开板块。
          注意：日期用相对表述（Now / Freshman year / Present）。 -->
     <section class="section" id="news">
