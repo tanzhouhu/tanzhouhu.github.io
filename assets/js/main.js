@@ -837,10 +837,6 @@
     var isNarrow = window.matchMedia("(max-width: 720px)").matches;
 
     function label(n) {
-      if (isNarrow) {
-        if (currentLang === "zh" && n.zhS) return n.zhS;
-        if (currentLang !== "zh" && n.enS) return n.enS;
-      }
       return currentLang === "zh" ? n.zh : n.en;
     }
 
