@@ -332,8 +332,8 @@
      进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
      之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
      想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
-     视频被 CSS 挪到屏幕外藏起来，画面由粒子 canvas 每帧 drawImage 合成——
-     手机浏览器会把 <video> 强制抬到最上层，直接放会盖掉粒子。 */
+     视频本身透明藏在横幅里，画面由粒子 canvas 每帧 drawImage 合成——
+     手机浏览器会把 <video> 强制抬到最上层，所以得靠 CSS 尽量藏。 */
   var bannerVideo = document.querySelector(".hero-banner-video");
   var bannerEl = document.querySelector(".hero-banner");
   if (bannerVideo) {
