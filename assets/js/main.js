@@ -1045,6 +1045,26 @@
     rafId = requestAnimationFrame(tick);
   })();
 
+  /* ---------- 干杯 Lottie（页面放 <div data-lottie="cheers"> 才加载） ---------- */
+  (function () {
+    var nodes = document.querySelectorAll("[data-lottie]");
+    if (!nodes.length) return;
+    var s = document.createElement("script");
+    s.src = "assets/js/lottie.min.js";
+    s.onload = function () {
+      for (var i = 0; i < nodes.length; i++) {
+        window.lottie.loadAnimation({
+          container: nodes[i],
+          renderer: "svg",
+          loop: true,
+          autoplay: true,
+          path: "assets/lottie/" + nodes[i].getAttribute("data-lottie") + ".json"
+        });
+      }
+    };
+    document.head.appendChild(s);
+  })();
+
   /* ---------- footer year ---------- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());

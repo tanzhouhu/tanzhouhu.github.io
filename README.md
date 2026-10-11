@@ -12,8 +12,10 @@ cv/index.html       # CV 页
 404.html            # 404 页
 assets/css/main.css # 样式（配色、字体、字号、布局都在这）
 assets/js/main.js   # 交互（打字机、粒子、研究图谱、主题/语言切换）
+assets/js/lottie.min.js # 干杯动画播放器（有 data-lottie 才加载）
+assets/lottie/      # 干杯动画 cheers.json
 assets/fonts/       # 自托管字体（中文楷体子集等）
-images/             # 头像 profile.jpg、favicon、小涂鸦插图
+images/             # 头像 profile.jpg、favicon、cheers.svg、小涂鸦插图
 videos/             # 横幅视频 hero-banner-v5.mp4
 ```
 
@@ -152,6 +154,31 @@ var TEXT = "Zhouhu Tan";   // 横幅里粒子拼出的字
 | 小涂鸦插图 | `images/` 下的 png | `index.html` 里搜 `doodle` 找引用处 |
 
 换头像建议 1200×900 的 4:3 横图；换成其他比例也能显示（不裁切）但留白不均匀。
+
+### 干杯动画（mimo 同款，会动）
+
+素材已经躺在仓库里，**现在页面上没放**，想用的时候加一行就行：
+
+```html
+<div data-lottie="cheers" style="width:200px;height:166px"></div>
+```
+
+`main.js` 里的钩子会自动加载播放器并循环播放，手不用碰 JS。
+宽高自己调，动画会自动撑满这个盒子。
+
+不想让它动、只要一张静图：
+
+```html
+<img src="images/cheers.svg" alt="" style="width:200px">
+```
+
+相关文件：
+
+| 文件 | 用途 |
+|---|---|
+| `assets/lottie/cheers.json` | 动画本体（Lottie 矢量） |
+| `assets/js/lottie.min.js` | 播放器（页面上没 `data-lottie` 就不会加载） |
+| `images/cheers.svg` | 静态一帧，不依赖 JS |
 
 ### CV 页
 
