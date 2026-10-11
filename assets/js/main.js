@@ -332,8 +332,8 @@
      进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
      之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
      想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
-     视频本身缩成 1px 藏起来，画面由粒子 canvas 每帧 drawImage 合成——
-     手机浏览器会把 <video> 强制抬到最上层并弹原生播放器，直接放会盖掉粒子。 */
+     视频被 CSS 挪到屏幕外藏起来，画面由粒子 canvas 每帧 drawImage 合成——
+     手机浏览器会把 <video> 强制抬到最上层，直接放会盖掉粒子。 */
   var bannerVideo = document.querySelector(".hero-banner-video");
   var bannerEl = document.querySelector(".hero-banner");
   if (bannerVideo) {
@@ -409,7 +409,8 @@
     var wrap = document.querySelector(".hero-banner");
     var canvas = document.getElementById("heroParticles");
     if (!wrap || !canvas) return;
-    var ctx = canvas.getContext("2d", { willReadFrequently: true });
+    // 这个画布只画不读像素，别开 willReadFrequently——那会把 GPU 加速关掉、强制 CPU 渲染，很卡
+    var ctx = canvas.getContext("2d");
     if (!ctx) return;
     var vidEl = document.querySelector(".hero-banner-video");
 
@@ -435,6 +436,9 @@
     var startTime = 0;
     var entering = true;
     var rafId = 0;
+    // 视频当前画到第几秒那一帧，用来跳过重复取帧；visible 为假时整条 rAF 停掉省电
+    var lastDrawTime = -1;
+    var visible = true;
 
     function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
 
@@ -511,8 +515,9 @@
         }
       }
 
-      // 粒子数量 900~5200，跟 mimo 一致
-      var target = Math.max(900, Math.min(5200, Math.floor((W * H) / 90)));
+      // 粒子数量 900~5200，跟 mimo 一致；手机（粗指针）减量，不然低端机扛不动
+      var per = isCoarse ? 150 : 90;
+      var target = Math.max(isCoarse ? 600 : 900, Math.min(5200, Math.floor((W * H) / per)));
       var every = Math.max(1, Math.ceil(pts.length / target));
 
       particles = [];
@@ -548,15 +553,21 @@
     }
 
     function frame(now) {
+      // 横幅滚出视野就停掉整条循环，回来再 kick() 续上，省电也省得后台空转
+      if (!visible) { rafId = 0; return; }
       ctx.clearRect(0, 0, W, H);
 
-      // 先把视频当前帧画到底（object-fit: cover），再叠粒子
-      if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0) {
+      // 先把视频当前帧画到底（object-fit: cover），再叠粒子。
+      // 只有当前帧真的换了才重画——视频一秒 25 帧，rAF 一秒 60 次，
+      // 每帧拿 1080p 缩放画一遍是手机卡顿的头号元凶。
+      if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0 &&
+          vidEl.currentTime !== lastDrawTime) {
         var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
         var scale = Math.max(W / vw, H / vh);
         var dw = vw * scale, dh = vh * scale;
         try {
           ctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
+          lastDrawTime = vidEl.currentTime;
         } catch (e) {}
       }
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
@@ -621,6 +632,11 @@
       rafId = requestAnimationFrame(frame);
     }
 
+    // 停过之后再续：rafId 为 0 表示当前没排帧
+    function kick() {
+      if (!rafId) rafId = requestAnimationFrame(frame);
+    }
+
     function setPointer(cx, cy) {
       mouse.cx = cx;
       mouse.cy = cy;
@@ -666,10 +682,20 @@
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(function () {
         cancelAnimationFrame(rafId);
+        rafId = 0;
         build();
-        rafId = requestAnimationFrame(frame);
+        kick();
       }, 180);
     });
+
+    // 横幅滚出/滚回视野：停/续粒子循环
+    if ("IntersectionObserver" in window) {
+      var visTarget = document.querySelector(".hero-banner-wrap") || wrap;
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) kick();
+      }, { threshold: 0 }).observe(visTarget);
+    }
 
     // 主题切换后重上色
     var themeToggle = document.getElementById("themeToggle");
@@ -677,8 +703,9 @@
       themeToggle.addEventListener("click", function () {
         setTimeout(function () {
           cancelAnimationFrame(rafId);
+          rafId = 0;
           build();
-          rafId = requestAnimationFrame(frame);
+          kick();
         }, 60);
       });
     }
@@ -692,10 +719,10 @@
           particles[k].y = particles[k].ty;
         }
         entering = false;
-        rafId = requestAnimationFrame(frame);
+        kick();
       } else {
         build();
-        rafId = requestAnimationFrame(frame);
+        kick();
       }
     }
 

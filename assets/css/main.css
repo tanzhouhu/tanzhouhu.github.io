@@ -454,15 +454,18 @@ html[data-js] .hero-banner-wrap.is-in {
   -webkit-user-select: none;
 }
 
-/* 视频不直接上屏：铺满但完全透明，画面由 canvas 取帧合成。
-   手机浏览器对 <video> 会强制压到最上层并弹原生播放器，粒子会被盖掉。
-   注意别缩成 1px——手机浏览器对看不见的视频直接不解码，canvas 就没画面。 */
+/* 视频不上屏：画面由 canvas 每帧取帧合成，粒子叠在上面。
+   手机浏览器（尤其国产内核 / 微信）不认 opacity:0，照样把 <video> 抬到最上层，
+   粒子会被整个盖住——索性把它整个挪到屏幕外，物理上就压不到 canvas。
+   位置用 fixed（脱出横幅的 overflow 裁切），并给足真实尺寸 640×360，
+   否则浏览器会认为「看不见的视频不用解码」，canvas 取不到帧。
+   别改成 display:none / visibility:hidden，那样一样不解码。 */
 .hero-banner-video {
-  position: absolute;
-  left: 0;
+  position: fixed;
+  left: -9999px;
   top: 0;
-  width: 100%;
-  height: 100%;
+  width: 640px;
+  height: 360px;
   object-fit: cover;
   opacity: 0;
   pointer-events: none;
