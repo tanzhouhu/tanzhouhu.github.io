@@ -154,8 +154,13 @@
            下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
-          <video class="hero-banner-video" muted playsinline
-                 preload="auto" aria-hidden="true">
+          <!-- 视频藏起来只给 canvas 取帧，手机就不会弹原生播放器/下载菜单 -->
+          <video class="hero-banner-video" muted playsinline webkit-playsinline
+                 preload="auto" aria-hidden="true"
+                 controlsList="nodownload nofullscreen noremoteplayback"
+                 disablePictureInPicture disableRemotePlayback
+                 x5-video-player-type="h5-page"
+                 x5-video-player-fullscreen="false">
             <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
           </video>
           <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>

@@ -331,8 +331,11 @@
   /* ---------- 横幅视频：文字打完 + 滑到横幅才播 ----------
      进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
      之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
-     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。 */
+     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
+     视频本身缩成 1px 藏起来，画面由粒子 canvas 每帧 drawImage 合成——
+     手机浏览器会把 <video> 强制抬到最上层并弹原生播放器，直接放会盖掉粒子。 */
   var bannerVideo = document.querySelector(".hero-banner-video");
+  var bannerEl = document.querySelector(".hero-banner");
   if (bannerVideo) {
     bannerVideo.loop = false;
     var videoInView = false;
@@ -351,6 +354,8 @@
     }
     window._tryPlayBanner = tryPlayBanner;
 
+    // 观察横幅容器而不是 1px 的 video，否则 intersection 算不准
+    var observeTarget = bannerEl || bannerVideo;
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         function (entries) {
@@ -366,7 +371,7 @@
           });
         },
         { threshold: [0, 0.3] }
-      ).observe(bannerVideo);
+      ).observe(observeTarget);
     }
 
     document.addEventListener("visibilitychange", function () {
@@ -376,6 +381,13 @@
         tryPlayBanner();
       }
     });
+
+    // 长按空白处也别弹「保存视频」系统菜单
+    if (bannerEl) {
+      bannerEl.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
   }
 
   /* ---------- 横幅粒子拼字（仿 mimo）----------
@@ -387,6 +399,7 @@
     if (!wrap || !canvas) return;
     var ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+    var vidEl = document.querySelector(".hero-banner-video");
 
     // 横幅里拼出的字，想换就改这一行
     var TEXT = "Zhouhu Tan";
@@ -524,6 +537,16 @@
 
     function frame(now) {
       ctx.clearRect(0, 0, W, H);
+
+      // 先把视频当前帧画到底（object-fit: cover），再叠粒子
+      if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0) {
+        var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
+        var scale = Math.max(W / vw, H / vh);
+        var dw = vw * scale, dh = vh * scale;
+        try {
+          ctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        } catch (e) {}
+      }
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
       var rect = wrap.getBoundingClientRect();
       mouse.x = mouse.cx - rect.left;
@@ -695,31 +718,31 @@
 
     var RESEARCH_GRAPH = {
       nodes: [
-        { id: "center", x: 0.5, y: 0.5, size: "center", en: "Research Map", zh: "研究图谱" },
-        { id: "llm", x: 0.24, y: 0.38, mx: 0.26, my: 0.24, size: "large", en: "Large Language Models", zh: "大语言模型" },
-        { id: "gnn", x: 0.52, y: 0.18, mx: 0.74, my: 0.22, size: "large", en: "Graph Neural Networks", zh: "图神经网络" },
-        { id: "sci", x: 0.8, y: 0.32, mx: 0.76, my: 0.72, size: "large", en: "AI for Science", zh: "科学智能" },
-        { id: "rve", x: 0.62, y: 0.74, mx: 0.26, my: 0.76, size: "large", en: "RL · Vision · Embodied", zh: "强化学习 · 视觉 · 具身", zhS: "RL · 视觉 · 具身", enS: "RL · Vision" },
+        { id: "center", x: 0.5, y: 0.5, mx: 0.5, my: 0.5, size: "center", en: "Research Map", zh: "研究图谱" },
+        { id: "llm", x: 0.24, y: 0.38, mx: 0.26, my: 0.34, size: "large", en: "Large Language Models", zh: "大语言模型", zhS: "大模型", enS: "LLM" },
+        { id: "gnn", x: 0.52, y: 0.18, mx: 0.54, my: 0.16, size: "large", en: "Graph Neural Networks", zh: "图神经网络", zhS: "图网络", enS: "GNN" },
+        { id: "sci", x: 0.8, y: 0.32, mx: 0.78, my: 0.58, size: "large", en: "AI for Science", zh: "科学智能", zhS: "科学智能", enS: "AI4Sci" },
+        { id: "rve", x: 0.62, y: 0.74, mx: 0.32, my: 0.72, size: "large", en: "RL · Vision · Embodied", zh: "强化学习 · 视觉 · 具身", zhS: "RL·视觉·具身", enS: "RL · Vision" },
 
-        { id: "reasoning", x: 0.1, y: 0.22, mx: 0.08, my: 0.08, size: "small", en: "Reasoning", zh: "推理" },
-        { id: "align", x: 0.12, y: 0.42, mx: 0.42, my: 0.1, size: "small", en: "Alignment", zh: "对齐" },
-        { id: "repr", x: 0.14, y: 0.58, mx: 0.06, my: 0.32, size: "small", en: "Representation", zh: "表征" },
-        { id: "know", x: 0.26, y: 0.62, mx: 0.4, my: 0.36, size: "small", en: "Knowledge Structure", zh: "知识结构" },
+        { id: "reasoning", x: 0.1, y: 0.22, mx: 0.08, my: 0.2, size: "small", en: "Reasoning", zh: "推理", zhS: "推理", enS: "Reasoning" },
+        { id: "align", x: 0.12, y: 0.42, mx: 0.06, my: 0.36, size: "small", en: "Alignment", zh: "对齐", zhS: "对齐", enS: "Align" },
+        { id: "repr", x: 0.14, y: 0.58, mx: 0.08, my: 0.5, size: "small", en: "Representation", zh: "表征", zhS: "表征", enS: "Repr" },
+        { id: "know", x: 0.26, y: 0.62, mx: 0.26, my: 0.54, size: "small", en: "Knowledge Structure", zh: "知识结构", zhS: "知识", enS: "Know" },
 
-        { id: "msg", x: 0.38, y: 0.1, mx: 0.56, my: 0.08, size: "small", en: "Message Passing", zh: "消息传递" },
-        { id: "grepr", x: 0.5, y: 0.06, mx: 0.92, my: 0.08, size: "small", en: "Graph Representation", zh: "图表征" },
-        { id: "ggen", x: 0.62, y: 0.1, mx: 0.56, my: 0.32, size: "small", en: "Graph Generation", zh: "图生成" },
-        { id: "rel", x: 0.68, y: 0.22, mx: 0.92, my: 0.3, size: "small", en: "Relational Learning", zh: "关系学习" },
+        { id: "msg", x: 0.38, y: 0.1, mx: 0.32, my: 0.08, size: "small", en: "Message Passing", zh: "消息传递", zhS: "消息", enS: "Msg" },
+        { id: "grepr", x: 0.5, y: 0.06, mx: 0.54, my: 0.05, size: "small", en: "Graph Representation", zh: "图表征", zhS: "图表征", enS: "Graph Repr" },
+        { id: "ggen", x: 0.62, y: 0.1, mx: 0.76, my: 0.08, size: "small", en: "Graph Generation", zh: "图生成", zhS: "图生成", enS: "Graph Gen" },
+        { id: "rel", x: 0.68, y: 0.22, mx: 0.84, my: 0.2, size: "small", en: "Relational Learning", zh: "关系学习", zhS: "关系", enS: "Relational" },
 
-        { id: "impute", x: 0.86, y: 0.16, mx: 0.58, my: 0.58, size: "small", en: "Multi-modal Imputation", zh: "多模态插补" },
-        { id: "mosaic", x: 0.92, y: 0.34, mx: 0.92, my: 0.56, size: "small", en: "Mosaic Imputation", zh: "马赛克插补" },
-        { id: "mol", x: 0.88, y: 0.5, mx: 0.58, my: 0.88, size: "small", en: "Molecular Modeling", zh: "分子建模" },
-        { id: "bio", x: 0.76, y: 0.54, mx: 0.92, my: 0.88, size: "small", en: "Biological Systems", zh: "生物系统" },
+        { id: "impute", x: 0.86, y: 0.16, mx: 0.72, my: 0.4, size: "small", en: "Multi-modal Imputation", zh: "多模态插补", zhS: "插补", enS: "Impute" },
+        { id: "mosaic", x: 0.92, y: 0.34, mx: 0.92, my: 0.42, size: "small", en: "Mosaic Imputation", zh: "马赛克插补", zhS: "马赛克", enS: "Mosaic" },
+        { id: "mol", x: 0.88, y: 0.5, mx: 0.9, my: 0.62, size: "small", en: "Molecular Modeling", zh: "分子建模", zhS: "分子", enS: "Molecule" },
+        { id: "bio", x: 0.76, y: 0.54, mx: 0.7, my: 0.7, size: "small", en: "Biological Systems", zh: "生物系统", zhS: "生物", enS: "Biology" },
 
-        { id: "rl", x: 0.44, y: 0.82, mx: 0.08, my: 0.6, size: "small", en: "Reinforcement Learning", zh: "强化学习" },
-        { id: "cv", x: 0.56, y: 0.9, mx: 0.42, my: 0.58, size: "small", en: "Computer Vision", zh: "计算机视觉" },
-        { id: "eai", x: 0.7, y: 0.88, mx: 0.08, my: 0.92, size: "small", en: "Embodied Agents", zh: "具身智能体" },
-        { id: "world", x: 0.78, y: 0.76, mx: 0.42, my: 0.9, size: "small", en: "World Interaction", zh: "世界交互" }
+        { id: "rl", x: 0.44, y: 0.82, mx: 0.12, my: 0.8, size: "small", en: "Reinforcement Learning", zh: "强化学习", zhS: "强化", enS: "RL" },
+        { id: "cv", x: 0.56, y: 0.9, mx: 0.28, my: 0.92, size: "small", en: "Computer Vision", zh: "计算机视觉", zhS: "视觉", enS: "Vision" },
+        { id: "eai", x: 0.7, y: 0.88, mx: 0.52, my: 0.9, size: "small", en: "Embodied Agents", zh: "具身智能体", zhS: "具身", enS: "Embodied" },
+        { id: "world", x: 0.78, y: 0.76, mx: 0.62, my: 0.8, size: "small", en: "World Interaction", zh: "世界交互", zhS: "世界", enS: "World" }
       ],
       links: [
         ["center", "llm"], ["center", "gnn"], ["center", "sci"], ["center", "rve"],
@@ -897,29 +920,13 @@
         ctx.stroke();
       }
 
-      // 节点文字；手机上小节点只画圆点，点中才露出名字
+      // 节点文字：手机/电脑都显示标签（手机用短名），小节点前加小圆点更像星座
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       for (var j = 0; j < nodes.length; j++) {
         var n = nodes[j];
         var p = pos(n, time);
         var isHot = hovered && hovered.id === n.id;
-
-        if (n.size === "small" && isNarrow) {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, isHot ? 4 : 3, 0, Math.PI * 2);
-          ctx.fillStyle = isHot ? c.accent : c.small;
-          ctx.fill();
-          if (isHot) {
-            ctx.font = fontFor("small");
-            ctx.fillStyle = c.smallHover;
-            var toLeft = p.x > W * 0.55;
-            ctx.textAlign = toLeft ? "right" : "left";
-            ctx.fillText(label(n), p.x + (toLeft ? -10 : 10), p.y);
-            ctx.textAlign = "center";
-          }
-          continue;
-        }
 
         if (n.size === "center") {
           ctx.fillStyle = c.accent;
@@ -929,6 +936,21 @@
           ctx.fillStyle = isHot ? c.smallHover : c.small;
         }
         ctx.font = fontFor(n.size);
+
+        if (n.size === "small" && isNarrow) {
+          // 小圆点 + 标签，像星座图上的星点
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, isHot ? 3.2 : 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = isHot ? c.accent : c.small;
+          ctx.fill();
+          ctx.fillStyle = isHot ? c.smallHover : c.small;
+          var toLeft = p.x > W * 0.62;
+          ctx.textAlign = toLeft ? "right" : "left";
+          ctx.fillText(label(n), p.x + (toLeft ? -8 : 8), p.y);
+          ctx.textAlign = "center";
+          continue;
+        }
+
         ctx.fillText(label(n), p.x, p.y);
       }
     }

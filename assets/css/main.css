@@ -448,16 +448,25 @@ html[data-js] .hero-banner-wrap.is-in {
   border: 1px solid var(--hair);
   /* 手指划着推粒子时别让浏览器先判定滚动，左右立刻跟手；上下仍可滚页面 */
   touch-action: pan-y;
+  /* 长按视频弹「保存/下载」的系统菜单 */
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
+/* 视频不直接上屏：缩成 1px 透明，画面由 canvas 取帧合成。
+   手机浏览器对 <video> 会强制压到最上层并弹原生播放器，粒子会被盖掉。 */
 .hero-banner-video {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
   pointer-events: none;
+  border: 0;
+  -webkit-user-drag: none;
+  user-drag: none;
 }
 
 .hero-banner-canvas {
@@ -466,6 +475,7 @@ html[data-js] .hero-banner-wrap.is-in {
   width: 100%;
   height: 100%;
   display: block;
+  z-index: 1;
 }
 
 .hero-banner-btn {
@@ -1286,9 +1296,9 @@ html.dark .doodle img[src$="max.svg"] {
 }
 
 @media (max-width: 720px) {
-  /* 研究图谱：手机上分区排布、小节点是圆点，tooltip 贴底 */
+  /* 研究图谱：手机上也是星座图+文字标签（短名），tooltip 贴底 */
   .research-graph-wrap {
-    height: 470px;
+    height: 520px;
     margin: 24px 0 8px;
   }
 
