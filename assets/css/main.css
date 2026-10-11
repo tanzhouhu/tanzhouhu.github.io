@@ -582,12 +582,22 @@ html[lang="zh-CN"] .research-graph-wrap {
   height: 520px;
   margin: 36px 0 8px;
   overflow: hidden;
+  /* 点按节点时不要弹选中高亮/系统菜单（那种蓝色覆盖） */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .research-graph-wrap canvas {
   width: 100%;
   height: 100%;
   display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .research-graph-hint {
@@ -1276,9 +1286,9 @@ html.dark .doodle img[src$="max.svg"] {
 }
 
 @media (max-width: 720px) {
-  /* 研究图谱：手机上压扁一点，tooltip 改成贴底卡片 */
+  /* 研究图谱：手机上分区排布、小节点是圆点，tooltip 贴底 */
   .research-graph-wrap {
-    height: 420px;
+    height: 470px;
     margin: 24px 0 8px;
   }
 
@@ -1288,6 +1298,9 @@ html.dark .doodle img[src$="max.svg"] {
     bottom: 12px !important;
     top: auto !important;
     max-width: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .nav-links {

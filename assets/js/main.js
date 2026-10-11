@@ -696,30 +696,30 @@
     var RESEARCH_GRAPH = {
       nodes: [
         { id: "center", x: 0.5, y: 0.5, size: "center", en: "Research Map", zh: "研究图谱" },
-        { id: "llm", x: 0.24, y: 0.38, size: "large", en: "Large Language Models", zh: "大语言模型" },
-        { id: "gnn", x: 0.52, y: 0.18, size: "large", en: "Graph Neural Networks", zh: "图神经网络" },
-        { id: "sci", x: 0.8, y: 0.32, size: "large", en: "AI for Science", zh: "科学智能" },
-        { id: "rve", x: 0.62, y: 0.74, size: "large", en: "RL · Vision · Embodied", zh: "强化学习 · 视觉 · 具身" },
+        { id: "llm", x: 0.24, y: 0.38, mx: 0.26, my: 0.24, size: "large", en: "Large Language Models", zh: "大语言模型" },
+        { id: "gnn", x: 0.52, y: 0.18, mx: 0.74, my: 0.22, size: "large", en: "Graph Neural Networks", zh: "图神经网络" },
+        { id: "sci", x: 0.8, y: 0.32, mx: 0.76, my: 0.72, size: "large", en: "AI for Science", zh: "科学智能" },
+        { id: "rve", x: 0.62, y: 0.74, mx: 0.26, my: 0.76, size: "large", en: "RL · Vision · Embodied", zh: "强化学习 · 视觉 · 具身", zhS: "RL · 视觉 · 具身", enS: "RL · Vision" },
 
-        { id: "reasoning", x: 0.1, y: 0.22, size: "small", en: "Reasoning", zh: "推理" },
-        { id: "align", x: 0.12, y: 0.42, size: "small", en: "Alignment", zh: "对齐" },
-        { id: "repr", x: 0.14, y: 0.58, size: "small", en: "Representation", zh: "表征" },
-        { id: "know", x: 0.26, y: 0.62, size: "small", en: "Knowledge Structure", zh: "知识结构" },
+        { id: "reasoning", x: 0.1, y: 0.22, mx: 0.08, my: 0.08, size: "small", en: "Reasoning", zh: "推理" },
+        { id: "align", x: 0.12, y: 0.42, mx: 0.42, my: 0.1, size: "small", en: "Alignment", zh: "对齐" },
+        { id: "repr", x: 0.14, y: 0.58, mx: 0.06, my: 0.32, size: "small", en: "Representation", zh: "表征" },
+        { id: "know", x: 0.26, y: 0.62, mx: 0.4, my: 0.36, size: "small", en: "Knowledge Structure", zh: "知识结构" },
 
-        { id: "msg", x: 0.38, y: 0.1, size: "small", en: "Message Passing", zh: "消息传递" },
-        { id: "grepr", x: 0.5, y: 0.06, size: "small", en: "Graph Representation", zh: "图表征" },
-        { id: "ggen", x: 0.62, y: 0.1, size: "small", en: "Graph Generation", zh: "图生成" },
-        { id: "rel", x: 0.68, y: 0.22, size: "small", en: "Relational Learning", zh: "关系学习" },
+        { id: "msg", x: 0.38, y: 0.1, mx: 0.56, my: 0.08, size: "small", en: "Message Passing", zh: "消息传递" },
+        { id: "grepr", x: 0.5, y: 0.06, mx: 0.92, my: 0.08, size: "small", en: "Graph Representation", zh: "图表征" },
+        { id: "ggen", x: 0.62, y: 0.1, mx: 0.56, my: 0.32, size: "small", en: "Graph Generation", zh: "图生成" },
+        { id: "rel", x: 0.68, y: 0.22, mx: 0.92, my: 0.3, size: "small", en: "Relational Learning", zh: "关系学习" },
 
-        { id: "impute", x: 0.86, y: 0.16, size: "small", en: "Multi-modal Imputation", zh: "多模态插补" },
-        { id: "mosaic", x: 0.92, y: 0.34, size: "small", en: "Mosaic Imputation", zh: "马赛克插补" },
-        { id: "mol", x: 0.88, y: 0.5, size: "small", en: "Molecular Modeling", zh: "分子建模" },
-        { id: "bio", x: 0.76, y: 0.54, size: "small", en: "Biological Systems", zh: "生物系统" },
+        { id: "impute", x: 0.86, y: 0.16, mx: 0.58, my: 0.58, size: "small", en: "Multi-modal Imputation", zh: "多模态插补" },
+        { id: "mosaic", x: 0.92, y: 0.34, mx: 0.92, my: 0.56, size: "small", en: "Mosaic Imputation", zh: "马赛克插补" },
+        { id: "mol", x: 0.88, y: 0.5, mx: 0.58, my: 0.88, size: "small", en: "Molecular Modeling", zh: "分子建模" },
+        { id: "bio", x: 0.76, y: 0.54, mx: 0.92, my: 0.88, size: "small", en: "Biological Systems", zh: "生物系统" },
 
-        { id: "rl", x: 0.44, y: 0.82, size: "small", en: "Reinforcement Learning", zh: "强化学习" },
-        { id: "cv", x: 0.56, y: 0.9, size: "small", en: "Computer Vision", zh: "计算机视觉" },
-        { id: "eai", x: 0.7, y: 0.88, size: "small", en: "Embodied Agents", zh: "具身智能体" },
-        { id: "world", x: 0.78, y: 0.76, size: "small", en: "World Interaction", zh: "世界交互" }
+        { id: "rl", x: 0.44, y: 0.82, mx: 0.08, my: 0.6, size: "small", en: "Reinforcement Learning", zh: "强化学习" },
+        { id: "cv", x: 0.56, y: 0.9, mx: 0.42, my: 0.58, size: "small", en: "Computer Vision", zh: "计算机视觉" },
+        { id: "eai", x: 0.7, y: 0.88, mx: 0.08, my: 0.92, size: "small", en: "Embodied Agents", zh: "具身智能体" },
+        { id: "world", x: 0.78, y: 0.76, mx: 0.42, my: 0.9, size: "small", en: "World Interaction", zh: "世界交互" }
       ],
       links: [
         ["center", "llm"], ["center", "gnn"], ["center", "sci"], ["center", "rve"],
@@ -814,20 +814,26 @@
     var isNarrow = window.matchMedia("(max-width: 720px)").matches;
 
     function label(n) {
+      if (isNarrow) {
+        if (currentLang === "zh" && n.zhS) return n.zhS;
+        if (currentLang !== "zh" && n.enS) return n.enS;
+      }
       return currentLang === "zh" ? n.zh : n.en;
     }
 
-    // 节点轻漂浮；中心点固定。坐标带内边距，免得长标签被画布裁掉
+    // 节点轻漂浮；中心点固定。手机用 2×2 分区坐标，避免标签叠在一起
     function pos(n, t) {
-      var padX = isNarrow ? 56 : 36;
-      var padY = isNarrow ? 32 : 22;
-      var x = padX + n.x * (W - 2 * padX);
-      var y = padY + n.y * (H - 2 * padY);
+      var u = isNarrow && n.mx != null ? n.mx : n.x;
+      var v = isNarrow && n.my != null ? n.my : n.y;
+      var padX = isNarrow ? 40 : 36;
+      var padY = isNarrow ? 28 : 22;
+      var x = padX + u * (W - 2 * padX);
+      var y = padY + v * (H - 2 * padY);
       if (n.size === "center") return { x: x, y: y };
-      var r = n.size === "large" ? 12 : 8;
+      var r = isNarrow ? (n.size === "large" ? 5 : 4) : n.size === "large" ? 12 : 8;
       return {
-        x: x + Math.sin(0.4 * t + 11 * n.x + 7 * n.y) * r,
-        y: y + Math.cos(0.35 * t + 9 * n.y + 6 * n.x) * (0.7 * r)
+        x: x + Math.sin(0.4 * t + 11 * u + 7 * v) * r,
+        y: y + Math.cos(0.35 * t + 9 * v + 6 * u) * (0.7 * r)
       };
     }
 
@@ -849,8 +855,8 @@
         ? '"LXGW WenKai","Kaiti SC","Songti SC",serif'
         : 'Georgia,"Times New Roman",serif';
       if (isNarrow) {
-        if (size === "center") return "400 22px " + stack;
-        if (size === "large") return "600 12px " + stack;
+        if (size === "center") return "400 20px " + stack;
+        if (size === "large") return "600 13px " + stack;
         return "400 11px " + stack;
       }
       if (size === "center") return "400 30px " + stack;
@@ -891,13 +897,30 @@
         ctx.stroke();
       }
 
-      // 节点文字
+      // 节点文字；手机上小节点只画圆点，点中才露出名字
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       for (var j = 0; j < nodes.length; j++) {
         var n = nodes[j];
         var p = pos(n, time);
         var isHot = hovered && hovered.id === n.id;
+
+        if (n.size === "small" && isNarrow) {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, isHot ? 4 : 3, 0, Math.PI * 2);
+          ctx.fillStyle = isHot ? c.accent : c.small;
+          ctx.fill();
+          if (isHot) {
+            ctx.font = fontFor("small");
+            ctx.fillStyle = c.smallHover;
+            var toLeft = p.x > W * 0.55;
+            ctx.textAlign = toLeft ? "right" : "left";
+            ctx.fillText(label(n), p.x + (toLeft ? -10 : 10), p.y);
+            ctx.textAlign = "center";
+          }
+          continue;
+        }
+
         if (n.size === "center") {
           ctx.fillStyle = c.accent;
         } else if (n.size === "large") {
@@ -920,7 +943,9 @@
       for (var i = nodes.length - 1; i >= 0; i--) {
         var n = nodes[i];
         var p = pos(n, time);
-        var hit = n.size === "center" ? 90 : n.size === "large" ? 56 : 38;
+        var hit = isNarrow
+          ? n.size === "center" ? 52 : n.size === "large" ? 40 : 24
+          : n.size === "center" ? 90 : n.size === "large" ? 56 : 38;
         var dx = mx - p.x;
         var dy = my - p.y;
         if (dx * dx + dy * dy < hit * hit) return n;
@@ -961,14 +986,31 @@
 
     function onLeave() {
       mouse.active = false;
+      // 手机上点完简介留在屏幕上，别一抬手就消失
+      if (isNarrow && stickyTip) return;
       hovered = null;
       showTip(null);
+    }
+
+    var stickyTip = false;
+    function onDown(e) {
+      // 挡掉长按选中/点按高亮/双击缩放带来的蓝色覆盖
+      if (e.cancelable) e.preventDefault();
+      onMove(e);
+      if (isNarrow) {
+        stickyTip = !!hovered;
+        if (!hovered) showTip(null);
+      }
     }
 
     wrap.addEventListener("pointermove", onMove, { passive: true });
     wrap.addEventListener("pointerleave", onLeave);
     // 手机点按也出简介
-    wrap.addEventListener("pointerdown", onMove);
+    wrap.addEventListener("pointerdown", onDown);
+    wrap.addEventListener("touchstart", function (e) {
+      if (e.cancelable) e.preventDefault();
+    }, { passive: false });
+    wrap.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
     var resizeTimer = 0;
     window.addEventListener("resize", function () {
