@@ -1,5 +1,5 @@
 /* Zhouhu Tan — homepage interactions
-   页面交互脚本：主题切换、手机菜单、滚动动效、导航高亮、页脚年份。
+   页面交互脚本：主题切换、中英文切换、手机菜单、滚动动效、导航高亮、页脚年份。
    一般改内容不需要动这个文件；改坏了刷新页面没动画/按钮失灵就 git checkout 恢复。
 
    ===== 以后可能要改的几处 =====
@@ -7,6 +7,7 @@
    2. 粒子颜色：搜 COLOR_A / COLOR_B（两组 RGB，分深浅色）
    3. 打字机速度：搜 typeLine( 调用处，50 / 60 是每字毫秒数
    4. 图案点开停留时间：搜 1600（毫秒），改大小即可
+   5. 中英文文案：改 index.html 里对应标签的文字和 data-zh，不用动这里
    其它段落（主题切换、菜单、滚动进度）一般不用动。 */
 
 (function () {
@@ -125,8 +126,24 @@
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   // 打字全部结束后置 true，横幅视频等这个开关才播
   var heroTypingDone = false;
+  // 语言切换会 +1 让进行中的打字立刻收尾
+  var typingToken = 0;
+
+  function showHeroRest() {
+    heroTypingDone = true;
+    if (window._tryPlayBanner) window._tryPlayBanner();
+    var after = document.querySelectorAll(".hero-desc, .hero-links, .hero-banner-wrap");
+    Array.prototype.forEach.call(after, function (el, i) {
+      setTimeout(function () {
+        el.classList.add("is-in");
+      }, i * 150);
+    });
+  }
 
   function typeLine(slot, speed, done, holdEnd) {
+    // 语言切换已把打字收尾，别再启动新一轮
+    if (heroTypingDone) return;
+    var myToken = typingToken;
     var out = slot.querySelector(".type-out");
     var sizer = slot.querySelector(".type-sizer");
     if (!out || !sizer) {
@@ -145,6 +162,7 @@
 
     var i = 0;
     (function step() {
+      if (myToken !== typingToken) return;
       if (i < text.length) {
         out.insertBefore(document.createTextNode(text.charAt(i)), cursor);
         i += 1;
@@ -165,17 +183,100 @@
     })();
   }
 
+  /* 同步打字机输出：切换语言时不重打，直接把整行换掉（末行保留闪烁下划线） */
+  function syncTypeOuts() {
+    var slots = document.querySelectorAll(".hero .type-slot");
+    Array.prototype.forEach.call(slots, function (slot, idx) {
+      var sizer = slot.querySelector(".type-sizer");
+      var out = slot.querySelector(".type-out");
+      if (!sizer || !out) return;
+      var isLast = idx === slots.length - 1;
+      out.innerHTML =
+        sizer.innerHTML + (isLast ? '<span class="hold-underscore">_</span>' : "");
+    });
+  }
+
+  /* ---------- 中英文切换 ----------
+     英文写在标签中间，中文放在该标签的 data-zh 里；切换时整页互换，选择记在本地。
+     completeTyping=false 用于进页初始化（别把打字机动画提前掐掉）。 */
+  var langToggle = document.getElementById("langToggle");
+  var currentLang = "en";
+
+  function applyLang(lang, completeTyping) {
+    currentLang = lang;
+    root.setAttribute("lang", lang === "zh" ? "zh-CN" : "en");
+
+    var titleEl = document.querySelector("title[data-zh]");
+    if (titleEl) {
+      if (!titleEl.hasAttribute("data-en")) {
+        titleEl.setAttribute("data-en", titleEl.textContent);
+      }
+      titleEl.textContent =
+        lang === "zh" ? titleEl.getAttribute("data-zh") : titleEl.getAttribute("data-en");
+    }
+    var metaPairs = [
+      ['meta[name="description"]', "content"],
+      ['meta[property="og:title"]', "content"],
+      ['meta[property="og:description"]', "content"]
+    ];
+    metaPairs.forEach(function (pair) {
+      var el = document.querySelector(pair[0]);
+      if (!el || !el.hasAttribute("data-zh")) return;
+      if (!el.hasAttribute("data-en")) {
+        el.setAttribute("data-en", el.getAttribute(pair[1]) || "");
+      }
+      el.setAttribute(
+        pair[1],
+        lang === "zh" ? el.getAttribute("data-zh") : el.getAttribute("data-en")
+      );
+    });
+
+    var nodes = document.querySelectorAll("[data-zh]");
+    Array.prototype.forEach.call(nodes, function (el) {
+      if (el.tagName === "TITLE" || el.tagName === "META") return;
+      if (!el.hasAttribute("data-en")) {
+        el.setAttribute("data-en", el.innerHTML);
+      }
+      el.innerHTML =
+        lang === "zh" ? el.getAttribute("data-zh") : el.getAttribute("data-en");
+    });
+
+    if (completeTyping) {
+      if (!heroTypingDone) {
+        typingToken += 1;
+        syncTypeOuts();
+        showHeroRest();
+      } else {
+        syncTypeOuts();
+      }
+    }
+
+    var label = langToggle && langToggle.querySelector(".lang-label");
+    if (label) label.textContent = lang === "zh" ? "EN" : "中";
+    if (langToggle) {
+      langToggle.setAttribute("aria-label", lang === "zh" ? "Switch to English" : "切换为中文");
+    }
+    try {
+      localStorage.setItem("lang", lang);
+    } catch (e) {}
+  }
+
+  var savedLang = "en";
+  try {
+    savedLang = localStorage.getItem("lang") || "en";
+  } catch (e) {}
+  if (savedLang === "zh") applyLang("zh", false);
+
+  if (langToggle) {
+    langToggle.addEventListener("click", function () {
+      applyLang(currentLang === "zh" ? "en" : "zh", true);
+    });
+  }
+
   function runHeroTyping() {
     var slots = document.querySelectorAll(".hero .type-slot");
-    var after = document.querySelectorAll(".hero-desc, .hero-links, .hero-banner-wrap");
     function showRest() {
-      heroTypingDone = true;
-      if (window._tryPlayBanner) window._tryPlayBanner();
-      Array.prototype.forEach.call(after, function (el, i) {
-        setTimeout(function () {
-          el.classList.add("is-in");
-        }, i * 150);
-      });
+      showHeroRest();
     }
     if (!slots.length || reduceMotion) {
       Array.prototype.forEach.call(slots, function (slot) {

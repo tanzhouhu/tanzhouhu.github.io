@@ -15,7 +15,9 @@
      横幅上粒子拼的名字在 assets/js/main.js 搜 TEXT 就能改
   7. 换手绘图案：images/doodles/ 里四个 svg（羽毛/流星/土星/星系），
      换图就替换同名文件，或改条目里 <img src="images/doodles/xxx.svg">
-  8. 提醒：尖括号标签（<div> 等）不要删，只改文字；文件务必以 UTF-8 保存
+  8. 中英文切换：英文写在标签中间，中文写在该标签的 data-zh="..." 属性里，
+     改文字时两处一起改（data-zh 里的 <strong> 等标签也要留着）
+  9. 提醒：尖括号标签（<div> 等）不要删，只改文字；文件务必以 UTF-8 保存
   ======================================================================
 -->
 <html lang="en">
@@ -23,11 +25,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- 标签页标题 / 搜索引擎简介 / 分享卡片（og:），改名字时三处一起改 -->
-  <title>Zhouhu Tan · 谭周湖</title>
-  <meta name="description" content="Zhouhu Tan (谭周湖) — Undergraduate in Electronic and Information Engineering at Sichuan University. Research: LLMs, GNNs, AI for Science." />
-  <meta property="og:title" content="Zhouhu Tan · 谭周湖" />
-  <meta property="og:description" content="Undergraduate · Electronic and Information Engineering · Sichuan University · LLMs / GNNs / AI for Science" />
+  <!-- 标签页标题 / 搜索引擎简介 / 分享卡片（og:），改名字时三处一起改；data-zh 是中文版 -->
+  <title data-zh="谭周湖 · Zhouhu Tan">Zhouhu Tan · 谭周湖</title>
+  <meta name="description" content="Zhouhu Tan (谭周湖) — Undergraduate in Electronic and Information Engineering at Sichuan University. Research: LLMs, GNNs, AI for Science." data-zh="谭周湖（Zhouhu Tan）— 四川大学电子信息工程专业本科生。研究方向：大语言模型、图神经网络、科学智能。" />
+  <meta property="og:title" content="Zhouhu Tan · 谭周湖" data-zh="谭周湖 · Zhouhu Tan" />
+  <meta property="og:description" content="Undergraduate · Electronic and Information Engineering · Sichuan University · LLMs / GNNs / AI for Science" data-zh="本科生 · 电子信息工程 · 四川大学 · LLM / GNN / 科学智能" />
   <meta property="og:image" content="images/profile.jpg" />
   <meta property="og:type" content="profile" />
   <meta name="theme-color" content="#ffffff" />
@@ -61,14 +63,18 @@
        href 里的 #xxx 必须和下方某个 <section id="xxx"> 一致，点过去才会跳转 -->
   <header class="nav">
     <div class="nav-inner">
-      <a class="nav-brand" href="#hero">Zhouhu Tan<i>.</i></a>
+      <a class="nav-brand" href="#hero" data-zh="谭周湖<i>.</i>">Zhouhu Tan<i>.</i></a>
       <nav class="nav-links" id="navLinks">
-        <a href="#about">About</a>
-        <a href="#research">Research</a>
-        <a href="#news">News</a>
-        <a href="#education">Education</a>
+        <a href="#about" data-zh="关于">About</a>
+        <a href="#research" data-zh="研究">Research</a>
+        <a href="#news" data-zh="动态">News</a>
+        <a href="#education" data-zh="教育">Education</a>
       </nav>
       <div class="nav-actions">
+        <!-- 中英文切换按钮：显示的是「点击后会切成的语言」，文字两处（data-zh）一起改 -->
+        <button class="lang-toggle" id="langToggle" aria-label="切换为中文" title="切换中英文">
+          <span class="lang-label">中</span>
+        </button>
         <!-- 深浅色切换按钮，图标和逻辑不用动 -->
         <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle theme">
           <svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
@@ -92,39 +98,39 @@
          打字内容写在 .type-sizer 里；横幅粒子拼的字在 main.js 的 TEXT 变量 -->
     <section class="hero" id="hero">
       <div class="container hero-inner">
-        <p class="hero-eyebrow">Undergraduate · AI Research</p>
+        <p class="hero-eyebrow" data-zh="本科生 · 人工智能研究">Undergraduate · AI Research</p>
         <!-- 大名字后面的 .hero-name-zh 是中文小字，不要删（也走打字机，内容写在它的 type-sizer 里） -->
         <h1 class="hero-name">
           <span class="type-slot">
-            <span class="type-sizer">Hello, I&#x27;m Zhouhu Tan</span>
+            <span class="type-sizer" data-zh="你好，我是谭周湖">Hello, I&#x27;m Zhouhu Tan</span>
             <span class="type-out" aria-hidden="true"></span>
           </span>
           <span class="hero-name-zh">
             <span class="type-slot">
-              <span class="type-sizer">谭周湖</span>
+              <span class="type-sizer" data-zh="Zhouhu Tan">谭周湖</span>
               <span class="type-out" aria-hidden="true"></span>
             </span>
           </span>
         </h1>
         <p class="hero-title">
           <span class="type-slot">
-            <span class="type-sizer">Electronic and Information Engineering, Sichuan University</span>
+            <span class="type-sizer" data-zh="四川大学 电子信息工程">Electronic and Information Engineering, Sichuan University</span>
             <span class="type-out" aria-hidden="true"></span>
           </span>
         </p>
-        <p class="hero-desc">
+        <p class="hero-desc" data-zh="我研究<strong>大语言模型</strong>、<strong>图神经网络</strong>与<strong>科学智能</strong>——构建能够理解结构、语言与物理世界的模型。">
           I work on <strong>Large Language Models</strong>, <strong>Graph Neural Networks</strong>,
           and <strong>AI for Science</strong> — building models that understand structure, language,
           and the physical world.
         </p>
-        <p class="hero-desc no-margin-top">
+        <p class="hero-desc no-margin-top" data-zh="欢迎有意合作者通过下方邮箱与我联系。">
           Prospective collaborators are welcome to contact me at the email address below.
         </p>
         <!-- 快捷链接：加链接就复制一段 <a>...</a>
              站内链接（如 cv/）不用 target；站外链接保留 target="_blank" rel="noopener" -->
         <div class="hero-links">
           <a class="hero-btn hero-btn-solid" href="mailto:tanzhouhu@stu.scu.edu.cn">
-            <span>Email</span>
+            <span data-zh="邮箱">Email</span>
             <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
           </a>
           <a class="hero-btn" href="https://github.com/tanzhouhu" target="_blank" rel="noopener">
@@ -132,7 +138,7 @@
             <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
           </a>
           <a class="hero-btn" href="cv/">
-            <span>Curriculum Vitae</span>
+            <span data-zh="个人简历">Curriculum Vitae</span>
             <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
           </a>
         </div>
@@ -152,7 +158,7 @@
           </video>
           <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>
           <a class="hero-banner-btn" href="#research">
-            <span>Explore&nbsp;Research</span>
+            <span data-zh="探索&nbsp;研究">Explore&nbsp;Research</span>
             <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 7h11M9 4l3 3-3 3"/></svg>
           </a>
         </div>
@@ -166,22 +172,22 @@
         <div class="reveal">
           <div class="section-label">
             <span class="num">01</span>
-            <span class="name">About</span>
+            <span class="name" data-zh="关于">About</span>
           </div>
           <!-- <em> 是橙色斜体点睛词 -->
-          <h2 class="section-title">
+          <h2 class="section-title" data-zh="对<em>智能</em>充满好奇">
             Curious about <em>intelligence</em>
           </h2>
         </div>
 
         <div class="about-text reveal" data-delay="100">
-          <p>
+          <p data-zh="我是<strong>谭周湖（Zhouhu Tan）</strong>，<strong>四川大学</strong> <strong>电子信息工程</strong>专业本科生。研究兴趣集中在<strong>大语言模型</strong>、<strong>图神经网络</strong>与<strong>科学智能</strong>。">
             I am <strong>Zhouhu Tan (谭周湖)</strong>, an undergraduate majoring in
             <strong>Electronic and Information Engineering</strong> at
             <strong>Sichuan University</strong>. My research interests center on <strong>Large Language
             Models</strong>,<strong>Graph Neural Networks</strong>, and <strong>AI for Science</strong>.
           </p>
-          <p>
+          <p data-zh="我也关注<strong>强化学习</strong>、<strong>计算机视觉</strong>与<strong>具身智能</strong>。目前在<strong>四川大学人工智能学院琚玮副教授</strong>指导下开展本科生科研，并与<strong>中国科学院尹衡闯博士</strong>合作推进相关研究项目。">
             I also keep a broad eye on <strong>reinforcement learning</strong>, <strong>computer vision</strong>, and <strong>embodied AI</strong>.
             Currently, I am actively involved in undergraduate research under the supervision of <strong>Associate Professor Wei Ju(琚玮) from the School of
             Artificial Intelligence, Sichuan University</strong>, and collaborate with <strong>Dr. Hengchuang Yin(尹衡闯) from the Chinese Academy of Sciences</strong> on related research projects.
@@ -190,23 +196,23 @@
           <!-- 词条表：一行一个 <li>。加一行就复制一段，.k 是标签名，.v 是内容 -->
           <ul class="meta-list">
             <li>
-              <span class="k">Institution</span>
-              <span class="v">Sichuan University</span>
+              <span class="k" data-zh="单位">Institution</span>
+              <span class="v" data-zh="四川大学">Sichuan University</span>
               <span class="doodle" aria-hidden="true"><img src="images/doodles/standard.svg" alt="" /></span>
             </li>
             <li>
-              <span class="k">Advisor</span>
-              <span class="v">Assoc. Prof. Wei Ju · 琚玮 and Dr. Hengchuang Yin· 尹衡闯</span>
+              <span class="k" data-zh="导师">Advisor</span>
+              <span class="v" data-zh="琚玮副教授与尹衡闯博士">Assoc. Prof. Wei Ju · 琚玮 and Dr. Hengchuang Yin· 尹衡闯</span>
               <span class="doodle" aria-hidden="true"><img src="images/doodles/lite.svg" alt="" /></span>
             </li>
             <li>
-              <span class="k">Location</span>
-              <span class="v">Chengdu, China</span>
+              <span class="k" data-zh="所在地">Location</span>
+              <span class="v" data-zh="中国 · 成都">Chengdu, China</span>
               <span class="doodle" aria-hidden="true"><img src="images/doodles/pro.svg" alt="" /></span>
             </li>
             <li>
-              <span class="k">Focus</span>
-              <span class="v">LLM · GNN · AI for Science</span>
+              <span class="k" data-zh="研究方向">Focus</span>
+              <span class="v" data-zh="LLM · GNN · 科学智能">LLM · GNN · AI for Science</span>
               <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
             </li>
           </ul>
@@ -225,12 +231,12 @@
         <div class="reveal">
           <div class="section-label">
             <span class="num">02</span>
-            <span class="name">Research</span>
+            <span class="name" data-zh="研究">Research</span>
           </div>
-          <h2 class="section-title">
+          <h2 class="section-title" data-zh="我不断<em>回望</em>的问题">
             Questions I keep <em>returning to</em>
           </h2>
-          <p class="section-lead">
+          <p class="section-lead" data-zh="从基础模型到科学发现——几个始终吸引我的问题。">
             From foundation models to scientific discovery — a few problems that hold my attention.
           </p>
         </div>
@@ -239,18 +245,18 @@
           <li class="research-item reveal">
             <div class="research-idx">01</div>
             <div>
-              <h3 class="research-name">
+              <h3 class="research-name" data-zh="大语言模型">
                 Large Language Models
               </h3>
             </div>
-            <p class="research-desc">
+            <p class="research-desc" data-zh="推理、表征与对齐——大模型如何组织知识并做出决策。">
               Reasoning, representation, and alignment — how large models structure knowledge
               and make decisions.
             </p>
             <ul class="research-tags">
-              <li>Reasoning</li>
-              <li>Alignment</li>
-              <li>Representation</li>
+              <li data-zh="推理">Reasoning</li>
+              <li data-zh="对齐">Alignment</li>
+              <li data-zh="表征">Representation</li>
             </ul>
             <!-- 手绘图案：鼠标悬停（电脑）/ 点击（手机）本条目时浮现
                  换图就改 src 里的文件名；不想要图案就把这一行整行删掉 -->
@@ -260,18 +266,18 @@
           <li class="research-item reveal" data-delay="80">
             <div class="research-idx">02</div>
             <div>
-              <h3 class="research-name">
+              <h3 class="research-name" data-zh="图神经网络">
                 Graph Neural Networks
               </h3>
             </div>
-            <p class="research-desc">
+            <p class="research-desc" data-zh="在关系与结构数据上学习——消息传递、表征学习与图生成。">
               Learning over relational and structured data — message passing, representation
               learning, and graph generation.
             </p>
             <ul class="research-tags">
               <li>GNN</li>
-              <li>Structure</li>
-              <li>Representation</li>
+              <li data-zh="结构">Structure</li>
+              <li data-zh="表征">Representation</li>
             </ul>
             <span class="doodle" aria-hidden="true"><img src="images/doodles/pro.svg" alt="" /></span>
           </li>
@@ -279,18 +285,18 @@
           <li class="research-item reveal" data-delay="160">
             <div class="research-idx">03</div>
             <div>
-              <h3 class="research-name">
+              <h3 class="research-name" data-zh="科学智能">
                 AI for Science
               </h3>
             </div>
-            <p class="research-desc">
+            <p class="research-desc" data-zh="将机器学习用于科学问题——建模生物系统、分子与复杂实验数据。">
               Applying machine learning to scientific problems — modeling biological systems,
               molecules, and complex experimental data.
             </p>
             <ul class="research-tags">
-              <li>Biology</li>
-              <li>Multi-modal</li>
-              <li>Modeling</li>
+              <li data-zh="生物">Biology</li>
+              <li data-zh="多模态">Multi-modal</li>
+              <li data-zh="建模">Modeling</li>
             </ul>
             <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
           </li>
@@ -298,11 +304,11 @@
           <li class="research-item reveal" data-delay="240">
             <div class="research-idx">04</div>
             <div>
-              <h3 class="research-name">
+              <h3 class="research-name" data-zh="强化学习 · 视觉 · 具身智能">
                 RL · Vision · Embodied AI
               </h3>
             </div>
-            <p class="research-desc">
+            <p class="research-desc" data-zh="面向未来的更广阔视野——强化学习、计算机视觉，以及能在真实世界中行动的智能体。">
               Broader horizons for the future — reinforcement learning, computer vision, and
               agents that act in the world.
             </p>
@@ -337,30 +343,29 @@
         <div class="reveal">
           <div class="section-label">
             <span class="num">03</span>
-            <span class="name">News</span>
+            <span class="name" data-zh="动态">News</span>
           </div>
-          <h2 class="section-title">
+          <h2 class="section-title" data-zh="最新<em>动态</em>">
             Recent <em>updates</em>
           </h2>
         </div>
 
         <ul class="news-list">
           <li class="news-item reveal">
-            <div class="news-date">Now</div>
+            <div class="news-date" data-zh="现在">Now</div>
             <div class="news-body">
-              <h3>Undergraduate research</h3>
-              <p>
-               collaborating with Dr. Hengchuang Yin from the Chinese Academy of Sciences on multimodal mosaic imputation.
-          </p>
+              <h3 data-zh="本科生科研">Undergraduate research</h3>
+              <p data-zh="与中国科学院尹衡闯博士合作，开展多模态马赛克插补研究。">
+                Collaborating with Dr. Hengchuang Yin from the Chinese Academy of Sciences on multimodal mosaic imputation.
               </p>
             </div>
             <span class="doodle" aria-hidden="true"><img src="images/doodles/max.svg" alt="" /></span>
           </li>
           <li class="news-item reveal" data-delay="90">
-            <div class="news-date">Freshman year</div>
+            <div class="news-date" data-zh="大一">Freshman year</div>
             <div class="news-body">
-              <h3>Started research early</h3>
-              <p>
+              <h3 data-zh="早期开启科研">Started research early</h3>
+              <p data-zh="大一下学期联系琚玮副教授，开始本科生科研。">
                 Reached out to Assoc. Prof. Wei Ju in the spring semester of my freshman year and began
                 undergraduate research.
               </p>
@@ -379,19 +384,19 @@
         <div class="reveal">
           <div class="section-label">
             <span class="num">04</span>
-            <span class="name">Education</span>
+            <span class="name" data-zh="教育">Education</span>
           </div>
-          <h2 class="section-title">
+          <h2 class="section-title" data-zh="学术<em>之路</em>">
             Academic <em>path</em>
           </h2>
         </div>
 
         <div class="edu-block reveal">
-          <div class="edu-when">Present</div>
+          <div class="edu-when" data-zh="至今">Present</div>
           <div class="edu-body">
-            <h3>Sichuan University</h3>
-            <p class="edu-degree">B.S. in Electronic and Information Engineering</p>
-            <p class="edu-detail">
+            <h3 data-zh="四川大学">Sichuan University</h3>
+            <p class="edu-degree" data-zh="电子信息工程 学士">B.S. in Electronic and Information Engineering</p>
+            <p class="edu-detail" data-zh="相关课程：化学基础课程、电子信息核心课程、计算机相关课程。">
               Relevant coursework: Chemistry foundation courses, Electronic information core
               courses, Computer-related courses.
             </p>
@@ -406,9 +411,9 @@
     <div class="container footer-inner">
       <p class="footer-copy">
         © <span id="year">2026</span> <b>Zhouhu Tan · 谭周湖</b>
-        &nbsp;— Designed with care in Chengdu
+        <span data-zh="&nbsp;— 于成都用心设计">&nbsp;— Designed with care in Chengdu</span>
       </p>
-      <a class="footer-top" href="#hero">Back to top</a>
+      <a class="footer-top" href="#hero" data-zh="回到顶部">Back to top</a>
     </div>
   </footer>
 

@@ -166,7 +166,8 @@ p { margin: 0; }
   gap: 6px;
 }
 
-.theme-toggle {
+.theme-toggle,
+.lang-toggle {
   width: 36px;
   height: 36px;
   display: grid;
@@ -177,9 +178,17 @@ p { margin: 0; }
   transition: color 0.2s ease, border-color 0.2s ease;
 }
 
-.theme-toggle:hover {
+.theme-toggle:hover,
+.lang-toggle:hover {
   color: var(--accent);
   border-color: var(--accent);
+}
+
+.lang-toggle {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
 }
 
 html:not(.dark) .icon-moon { display: none; }
