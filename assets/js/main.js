@@ -336,6 +336,18 @@
      手机浏览器会把 <video> 强制抬到最上层，所以得靠 CSS 尽量藏。 */
   var bannerVideo = document.querySelector(".hero-banner-video");
   var bannerEl = document.querySelector(".hero-banner");
+  // 小米自带浏览器（MiuiBrowser）会把正在播的 <video> 强制抬到所有内容之上，
+  // opacity / z-index 都压不住，粒子直接被盖掉。这种内核干脆不播视频，只留粒子。
+  // 以后再遇到同类强制置顶的内核，往这个列表里加 UA 特征即可。
+  if (bannerVideo && /MiuiBrowser/i.test(navigator.userAgent || "")) {
+    if (bannerVideo.parentNode) bannerVideo.parentNode.removeChild(bannerVideo);
+    bannerVideo = null;
+  }
+  // QQ 浏览器（X5 内核）可能把 opacity:0 的视频当成「看不见」而拒绝解码。
+  // 抬到 0.01 让它判定为可见并正常出帧；画面本身被 canvas 画满，肉眼看不到这层。
+  if (bannerVideo && /MQQBrowser/i.test(navigator.userAgent || "")) {
+    bannerVideo.style.opacity = "0.01";
+  }
   if (bannerVideo) {
     bannerVideo.loop = false;
     var videoInView = false;
@@ -382,9 +394,13 @@
       }
     });
 
-    // 手机浏览器可能拦掉自动播：用户一碰屏幕就补播一次
+    // 手机浏览器可能拦掉自动播：用户一碰屏幕就补播一次。
+    // 注意：打字还没结束时不能摘监听——早先的实现第一次碰屏幕就把监听删了，
+    // 那次补播被 heroTypingDone 挡掉，之后视频永远起不来（QQ 浏览器就是这么没视频的）。
+    // 播完（ended）也不再重播，免得用户碰一下又从头放。
     function kickOnGesture() {
-      if (bannerVideo.paused) {
+      if (!heroTypingDone) return;
+      if (bannerVideo.paused && !bannerVideo.ended) {
         videoInView = true;
         tryPlayBanner();
       }
