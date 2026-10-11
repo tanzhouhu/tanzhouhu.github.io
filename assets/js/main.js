@@ -382,6 +382,18 @@
       }
     });
 
+    // 手机浏览器可能拦掉自动播：用户一碰屏幕就补播一次
+    function kickOnGesture() {
+      if (bannerVideo.paused) {
+        videoInView = true;
+        tryPlayBanner();
+      }
+      document.removeEventListener("touchstart", kickOnGesture);
+      document.removeEventListener("pointerdown", kickOnGesture);
+    }
+    document.addEventListener("touchstart", kickOnGesture, { passive: true });
+    document.addEventListener("pointerdown", kickOnGesture, { passive: true });
+
     // 长按空白处也别弹「保存视频」系统菜单
     if (bannerEl) {
       bannerEl.addEventListener("contextmenu", function (e) {
