@@ -154,15 +154,9 @@
            下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
-          <!-- 视频藏起来只给 canvas 取帧，手机就不会弹原生播放器/下载菜单 -->
-          <video class="hero-banner-video" muted playsinline webkit-playsinline
-                 preload="auto" aria-hidden="true"
-                 controlsList="nodownload nofullscreen noremoteplayback"
-                 disablePictureInPicture disableRemotePlayback
-                 x5-video-player-type="h5-page"
-                 x5-video-player-fullscreen="false">
-            <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
-          </video>
+          <!-- 视频不写在这里：main.js 会在内存里新建、故意不放进网页（detached），
+               这样「一播视频就强制置顶」的手机浏览器抓不到它，粒子不会被盖住。
+               画面仍由 canvas 取帧合成。要改视频文件：覆盖 videos/hero-banner-v5.mp4 即可 -->
           <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>
           <a class="hero-banner-btn" href="#research">
             <span data-zh="探索&nbsp;研究">Explore&nbsp;Research</span>
