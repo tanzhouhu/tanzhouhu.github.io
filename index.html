@@ -40,6 +40,8 @@
   <!-- 网络字体：Inter（正文）+ Newsreader（衬线标题）。国内访问慢属正常，会自动回退系统字体 -->
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin />
   <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700|newsreader:400,500,600,700,700i" rel="stylesheet" />
+  <!-- 霞鹜文楷：中文首屏的手写楷体（已子集化自托管，OFL 开源） -->
+  <link rel="stylesheet" href="assets/fonts/lxgw-wenkai-light.css" />
   <link rel="stylesheet" href="assets/css/main.css" />
   <!-- 这段脚本必须留在 <head>：在渲染前套用深色主题，防止页面闪白/闪黑。别删 -->
   <script>
@@ -240,6 +242,20 @@
             From foundation models to scientific discovery — a few problems that hold my attention.
           </p>
         </div>
+
+        <!-- 研究图谱：仿 mimo「开发者的声音」星图。
+             节点数据在 assets/js/main.js 里搜 RESEARCH_GRAPH；
+             想加/改子课题，改那个数组即可（size: large 是方向，small 是分支课题） -->
+        <div class="research-graph-wrap reveal" data-delay="120">
+          <canvas id="researchGraph" aria-hidden="true"></canvas>
+          <div class="research-graph-tip" id="researchGraphTip" aria-hidden="true">
+            <div class="rg-tip-title"></div>
+            <div class="rg-tip-desc"></div>
+          </div>
+        </div>
+        <p class="research-graph-hint reveal" data-delay="160" data-zh="悬停小节点，看这个分支课题的一句话简介">
+          Hover a small node to read a one-line note on that branch
+        </p>
 
         <ul class="research-list">
           <li class="research-item reveal">

@@ -1,0 +1,9 @@
+/* LXGW WenKai (霞鹜文楷) Light — 自托管子集，仅含本页用到的字符
+   字体来源 https://github.com/lxgw/LxgwWenKai  SIL Open Font License 1.1 */
+@font-face {
+  font-family: "LXGW WenKai";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("lxgwwenkai-light.woff2") format("woff2");
+}

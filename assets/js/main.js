@@ -679,6 +679,312 @@
     }
   })();
 
+  /* ---------- 研究图谱（仿 mimo 开发者之声）----------
+     中心 = 研究总览，large = 研究方向，small = 分支课题（以后有论文可换成论文标题）。
+     悬停小节点出一句话简介；节点轻轻漂浮，跟手不跟鼠标。
+     加/改课题：编辑 RESEARCH_GRAPH 里的 nodes / links / notes 即可。 */
+  (function researchGraph() {
+    var wrap = document.querySelector(".research-graph-wrap");
+    var canvas = document.getElementById("researchGraph");
+    if (!wrap || !canvas) return;
+    var tip = document.getElementById("researchGraphTip");
+    var tipTitle = tip && tip.querySelector(".rg-tip-title");
+    var tipDesc = tip && tip.querySelector(".rg-tip-desc");
+    var ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    var RESEARCH_GRAPH = {
+      nodes: [
+        { id: "center", x: 0.5, y: 0.5, size: "center", en: "Research Map", zh: "研究图谱" },
+        { id: "llm", x: 0.24, y: 0.38, size: "large", en: "Large Language Models", zh: "大语言模型" },
+        { id: "gnn", x: 0.52, y: 0.18, size: "large", en: "Graph Neural Networks", zh: "图神经网络" },
+        { id: "sci", x: 0.8, y: 0.32, size: "large", en: "AI for Science", zh: "科学智能" },
+        { id: "rve", x: 0.62, y: 0.74, size: "large", en: "RL · Vision · Embodied", zh: "强化学习 · 视觉 · 具身" },
+
+        { id: "reasoning", x: 0.1, y: 0.22, size: "small", en: "Reasoning", zh: "推理" },
+        { id: "align", x: 0.12, y: 0.42, size: "small", en: "Alignment", zh: "对齐" },
+        { id: "repr", x: 0.14, y: 0.58, size: "small", en: "Representation", zh: "表征" },
+        { id: "know", x: 0.26, y: 0.62, size: "small", en: "Knowledge Structure", zh: "知识结构" },
+
+        { id: "msg", x: 0.38, y: 0.1, size: "small", en: "Message Passing", zh: "消息传递" },
+        { id: "grepr", x: 0.5, y: 0.06, size: "small", en: "Graph Representation", zh: "图表征" },
+        { id: "ggen", x: 0.62, y: 0.1, size: "small", en: "Graph Generation", zh: "图生成" },
+        { id: "rel", x: 0.68, y: 0.22, size: "small", en: "Relational Learning", zh: "关系学习" },
+
+        { id: "impute", x: 0.86, y: 0.16, size: "small", en: "Multi-modal Imputation", zh: "多模态插补" },
+        { id: "mosaic", x: 0.92, y: 0.34, size: "small", en: "Mosaic Imputation", zh: "马赛克插补" },
+        { id: "mol", x: 0.88, y: 0.5, size: "small", en: "Molecular Modeling", zh: "分子建模" },
+        { id: "bio", x: 0.76, y: 0.54, size: "small", en: "Biological Systems", zh: "生物系统" },
+
+        { id: "rl", x: 0.44, y: 0.82, size: "small", en: "Reinforcement Learning", zh: "强化学习" },
+        { id: "cv", x: 0.56, y: 0.9, size: "small", en: "Computer Vision", zh: "计算机视觉" },
+        { id: "eai", x: 0.7, y: 0.88, size: "small", en: "Embodied Agents", zh: "具身智能体" },
+        { id: "world", x: 0.78, y: 0.76, size: "small", en: "World Interaction", zh: "世界交互" }
+      ],
+      links: [
+        ["center", "llm"], ["center", "gnn"], ["center", "sci"], ["center", "rve"],
+        ["llm", "reasoning"], ["llm", "align"], ["llm", "repr"], ["llm", "know"],
+        ["gnn", "msg"], ["gnn", "grepr"], ["gnn", "ggen"], ["gnn", "rel"],
+        ["sci", "impute"], ["sci", "mosaic"], ["sci", "mol"], ["sci", "bio"],
+        ["rve", "rl"], ["rve", "cv"], ["rve", "eai"], ["rve", "world"]
+      ],
+      // 分支课题的一句话简介（以后有论文，可在这里放论文标题/链接）
+      notes: {
+        reasoning: {
+          en: "How large models chain steps and reach a conclusion.",
+          zh: "大模型如何一步步推到结论。"
+        },
+        align: {
+          en: "Keeping model behavior consistent with intent.",
+          zh: "让模型行为与真实意图保持一致。"
+        },
+        repr: {
+          en: "How knowledge is structured inside the model.",
+          zh: "知识在模型内部如何组织。"
+        },
+        know: {
+          en: "Organizing what the model knows — and what it does not.",
+          zh: "整理模型知道什么、不知道什么。"
+        },
+        msg: {
+          en: "Local information exchange across a graph.",
+          zh: "图上的局部信息传递。"
+        },
+        grepr: {
+          en: "Embedding graph structure into vectors.",
+          zh: "把图结构嵌入向量空间。"
+        },
+        ggen: {
+          en: "Generating new graphs from learned distributions.",
+          zh: "从学到的分布里生成新图。"
+        },
+        rel: {
+          en: "Inductive bias for relational data.",
+          zh: "关系数据的归纳偏置。"
+        },
+        impute: {
+          en: "Filling in missing modalities across assays.",
+          zh: "补齐不同实验模态的缺失。"
+        },
+        mosaic: {
+          en: "Imputing mosaic-style missing patterns.",
+          zh: "处理马赛克式缺失模式的插补。"
+        },
+        mol: {
+          en: "Machine learning for molecules and chemical structure.",
+          zh: "面向分子与化学结构的机器学习。"
+        },
+        bio: {
+          en: "Modeling cells, pathways, and experiments.",
+          zh: "建模细胞、通路与实验数据。"
+        },
+        rl: {
+          en: "Learning from interaction and reward.",
+          zh: "在交互与奖励中学习。"
+        },
+        cv: {
+          en: "Perceiving the visual world.",
+          zh: "理解视觉世界。"
+        },
+        eai: {
+          en: "Agents that act in the world.",
+          zh: "能在真实世界里行动的智能体。"
+        },
+        world: {
+          en: "Closing the loop between perception and action.",
+          zh: "把感知与行动闭环连起来。"
+        }
+      }
+    };
+
+    var nodes = RESEARCH_GRAPH.nodes;
+    var links = RESEARCH_GRAPH.links;
+    var notes = RESEARCH_GRAPH.notes;
+    var byId = {};
+    nodes.forEach(function (n) {
+      byId[n.id] = n;
+    });
+
+    var W = 0, H = 0, dpr = 1;
+    var mouse = { x: -1, y: -1, active: false };
+    var hovered = null;
+    var time = 0;
+    var rafId = 0;
+    var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var isNarrow = window.matchMedia("(max-width: 720px)").matches;
+
+    function label(n) {
+      return currentLang === "zh" ? n.zh : n.en;
+    }
+
+    // 节点轻漂浮；中心点固定。坐标带内边距，免得长标签被画布裁掉
+    function pos(n, t) {
+      var padX = isNarrow ? 56 : 36;
+      var padY = isNarrow ? 32 : 22;
+      var x = padX + n.x * (W - 2 * padX);
+      var y = padY + n.y * (H - 2 * padY);
+      if (n.size === "center") return { x: x, y: y };
+      var r = n.size === "large" ? 12 : 8;
+      return {
+        x: x + Math.sin(0.4 * t + 11 * n.x + 7 * n.y) * r,
+        y: y + Math.cos(0.35 * t + 9 * n.y + 6 * n.x) * (0.7 * r)
+      };
+    }
+
+    function themeColors() {
+      var dark = document.documentElement.classList.contains("dark");
+      return {
+        link: dark ? "rgba(100,100,100,0.32)" : "rgba(175,168,160,0.34)",
+        center: dark ? "#f0efec" : "#1a1a1a",
+        large: dark ? "#e6e4df" : "#2d2a26",
+        small: dark ? "#8a8782" : "#8a8580",
+        smallHover: dark ? "#f0ebe5" : "#3a3530",
+        accent: dark ? "#fb923c" : "#ea580c"
+      };
+    }
+
+    function fontFor(size) {
+      var zh = currentLang === "zh";
+      var stack = zh
+        ? '"LXGW WenKai","Kaiti SC","Songti SC",serif'
+        : 'Georgia,"Times New Roman",serif';
+      if (isNarrow) {
+        if (size === "center") return "400 22px " + stack;
+        if (size === "large") return "600 12px " + stack;
+        return "400 11px " + stack;
+      }
+      if (size === "center") return "400 30px " + stack;
+      if (size === "large") return "600 17px " + stack;
+      return "400 13px " + stack;
+    }
+
+    function resize() {
+      var rect = wrap.getBoundingClientRect();
+      W = Math.floor(rect.width);
+      H = Math.floor(rect.height);
+      if (W <= 0 || H <= 0) return;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(W * dpr);
+      canvas.height = Math.floor(H * dpr);
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw() {
+      if (W <= 0 || H <= 0) return;
+      var c = themeColors();
+      ctx.clearRect(0, 0, W, H);
+
+      // 连线
+      ctx.lineWidth = 0.8;
+      ctx.strokeStyle = c.link;
+      for (var i = 0; i < links.length; i++) {
+        var a = byId[links[i][0]];
+        var b = byId[links[i][1]];
+        if (!a || !b) continue;
+        var pa = pos(a, time);
+        var pb = pos(b, time);
+        ctx.beginPath();
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.stroke();
+      }
+
+      // 节点文字
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      for (var j = 0; j < nodes.length; j++) {
+        var n = nodes[j];
+        var p = pos(n, time);
+        var isHot = hovered && hovered.id === n.id;
+        if (n.size === "center") {
+          ctx.fillStyle = c.accent;
+        } else if (n.size === "large") {
+          ctx.fillStyle = isHot ? c.accent : c.large;
+        } else {
+          ctx.fillStyle = isHot ? c.smallHover : c.small;
+        }
+        ctx.font = fontFor(n.size);
+        ctx.fillText(label(n), p.x, p.y);
+      }
+    }
+
+    function tick() {
+      if (!reduceMotion) time += 0.016;
+      draw();
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function hitTest(mx, my) {
+      for (var i = nodes.length - 1; i >= 0; i--) {
+        var n = nodes[i];
+        var p = pos(n, time);
+        var hit = n.size === "center" ? 90 : n.size === "large" ? 56 : 38;
+        var dx = mx - p.x;
+        var dy = my - p.y;
+        if (dx * dx + dy * dy < hit * hit) return n;
+      }
+      return null;
+    }
+
+    function showTip(n) {
+      if (!tip || !tipTitle || !tipDesc) return;
+      if (!n || !notes[n.id]) {
+        tip.classList.remove("visible");
+        return;
+      }
+      tipTitle.textContent = label(n);
+      tipDesc.textContent = currentLang === "zh" ? notes[n.id].zh : notes[n.id].en;
+      var p = pos(n, time);
+      if (!isNarrow) {
+        var x = p.x + 18;
+        var y = p.y - 70;
+        if (x + 270 > W) x = p.x - 278;
+        if (y < 8) y = p.y + 18;
+        if (y + 110 > H) y = H - 118;
+        tip.style.left = x + "px";
+        tip.style.top = y + "px";
+      }
+      tip.classList.add("visible");
+    }
+
+    function onMove(e) {
+      var rect = wrap.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+      mouse.active = true;
+      hovered = hitTest(mouse.x, mouse.y);
+      canvas.style.cursor = hovered && notes[hovered.id] ? "pointer" : "default";
+      showTip(hovered);
+    }
+
+    function onLeave() {
+      mouse.active = false;
+      hovered = null;
+      showTip(null);
+    }
+
+    wrap.addEventListener("pointermove", onMove, { passive: true });
+    wrap.addEventListener("pointerleave", onLeave);
+    // 手机点按也出简介
+    wrap.addEventListener("pointerdown", onMove);
+
+    var resizeTimer = 0;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        isNarrow = window.matchMedia("(max-width: 720px)").matches;
+        resize();
+      }, 160);
+    });
+
+    // 主题切换后颜色跟着变（下一帧重绘即可，颜色是每帧读的）
+
+    resize();
+    rafId = requestAnimationFrame(tick);
+  })();
+
   /* ---------- footer year ---------- */
   var yearEl = document.getElementById("year");
   if (yearEl) yearEl.textContent = String(new Date().getFullYear());
