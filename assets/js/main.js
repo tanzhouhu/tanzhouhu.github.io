@@ -414,6 +414,13 @@
     if (!ctx) return;
     var vidEl = document.querySelector(".hero-banner-video");
 
+    // 视频帧缓存：主画布每帧都要 clearRect，如果这一帧不重画视频，画面就被擦没了。
+    // 所以视频只在「换帧」时缩放进这张离屏缓存（1080p 缩放很贵，省下来），
+    // 之后每帧把缓存整张贴回主画布。视频放完停住不动，缓存就一直撑着末帧。
+    var vcache = document.createElement("canvas");
+    var vctx = vcache.getContext("2d");
+    var cacheReady = false;
+
     // 横幅里拼出的字，想换就改这一行
     var TEXT = "Zhouhu Tan";
     // 粒子主色：深墨 + 橙色渐变（取自主题）
@@ -455,6 +462,13 @@
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // 视频缓存跟主画布同尺寸（设备像素），贴回去时 1:1 不糊
+      vcache.width = canvas.width;
+      vcache.height = canvas.height;
+      if (vctx) vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cacheReady = false;
+      lastDrawTime = -1;
 
       // 量字号：clamp(4rem, 13vw, 10rem)，跟 mimo 一个套路
       var probe = document.createElement("span");
@@ -552,24 +566,34 @@
       entering = true;
     }
 
+    // 把视频当前帧按 object-fit:cover 缩进离屏缓存（贵，只在换帧时做）
+    function captureVideoFrame() {
+      if (!vctx || !vidEl || vidEl.readyState < 2 || !vidEl.videoWidth) return;
+      var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
+      var scale = Math.max(W / vw, H / vh);
+      var dw = vw * scale, dh = vh * scale;
+      vctx.clearRect(0, 0, W, H);
+      try {
+        vctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
+        cacheReady = true;
+      } catch (e) {
+        cacheReady = false;
+      }
+    }
+
     function frame(now) {
       // 横幅滚出视野就停掉整条循环，回来再 kick() 续上，省电也省得后台空转
       if (!visible) { rafId = 0; return; }
       ctx.clearRect(0, 0, W, H);
 
-      // 先把视频当前帧画到底（object-fit: cover），再叠粒子。
-      // 只有当前帧真的换了才重画——视频一秒 25 帧，rAF 一秒 60 次，
-      // 每帧拿 1080p 缩放画一遍是手机卡顿的头号元凶。
+      // 视频帧变了才重新缩放进缓存（1080p 缩放很贵），其余时候把缓存贴回去即可；
+      // 这样既不浪费，也不会因为「这帧没重画」而被 clearRect 擦成空白。
       if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0 &&
           vidEl.currentTime !== lastDrawTime) {
-        var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
-        var scale = Math.max(W / vw, H / vh);
-        var dw = vw * scale, dh = vh * scale;
-        try {
-          ctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
-          lastDrawTime = vidEl.currentTime;
-        } catch (e) {}
+        captureVideoFrame();
+        lastDrawTime = vidEl.currentTime;
       }
+      if (cacheReady) ctx.drawImage(vcache, 0, 0, W, H);
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
       var rect = wrap.getBoundingClientRect();
       mouse.x = mouse.cx - rect.left;
