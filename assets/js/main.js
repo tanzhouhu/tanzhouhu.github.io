@@ -332,62 +332,19 @@
      进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
      之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
      想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
-
-     视频只在内存里新建、故意不放进网页（detached）：页面里没有 <video>，
-     那些「一播视频就无视 CSS、强制把它顶到最上层」的手机浏览器（如小米自带）
-     就抓不到东西可顶，粒子不会被盖住；而 detached 视频照样能解码给 canvas 取帧。
-     兜底：万一某浏览器就是不认 detached 视频（例如部分 X5 内核），
-     播了 1.2 秒 currentTime 还不动，就把它挂回横幅，退回「透明铺满」的老办法。 */
+     视频本身透明藏在横幅里，画面由粒子 canvas 每帧 drawImage 合成——
+     手机浏览器会把 <video> 强制抬到最上层，所以得靠 CSS 尽量藏。 */
+  var bannerVideo = document.querySelector(".hero-banner-video");
   var bannerEl = document.querySelector(".hero-banner");
-  var bannerVideo = null;
-  if (bannerEl) {
-    bannerVideo = document.createElement("video");
-    bannerVideo.className = "hero-banner-video";
-    bannerVideo.muted = true;
-    bannerVideo.defaultMuted = true;
+  if (bannerVideo) {
     bannerVideo.loop = false;
-    bannerVideo.setAttribute("muted", "");
-    bannerVideo.setAttribute("playsinline", "");
-    bannerVideo.setAttribute("webkit-playsinline", "");
-    bannerVideo.setAttribute("preload", "auto");
-    bannerVideo.setAttribute("aria-hidden", "true");
-    bannerVideo.setAttribute("controlsList", "nodownload nofullscreen noremoteplayback");
-    bannerVideo.setAttribute("disablePictureInPicture", "");
-    bannerVideo.setAttribute("disableRemotePlayback", "");
-    bannerVideo.setAttribute("x5-video-player-type", "h5-page");
-    bannerVideo.setAttribute("x5-video-player-fullscreen", "false");
-    bannerVideo.src = "videos/hero-banner-v5.mp4";
-    try { bannerVideo.load(); } catch (e) {}
-    // 注意：这里故意不 appendChild——「不进网页」正是关键
-    window._bannerVideo = bannerVideo;
-  }
-
-  if (bannerVideo && bannerEl) {
     var videoInView = false;
-    var videoAttached = false; // 兜底挂回文档后置真，避免重复挂
-
-    // 兜底：把视频挂回横幅（CSS 会把它铺满 + opacity:0 藏起来）
-    function attachBannerVideo() {
-      if (videoAttached) return;
-      videoAttached = true;
-      var cv = bannerEl.querySelector(".hero-banner-canvas");
-      if (cv) bannerEl.insertBefore(bannerVideo, cv);
-      else bannerEl.appendChild(bannerVideo);
-    }
 
     function replayBanner() {
       try {
         bannerVideo.currentTime = 0;
         var p = bannerVideo.play();
         if (p && p.catch) p.catch(function () {});
-        // 播了一小会儿 currentTime 还纹丝不动 → 这浏览器不认 detached 视频，挂回去
-        var t0 = bannerVideo.currentTime;
-        setTimeout(function () {
-          if (!videoAttached && !bannerVideo.paused &&
-              bannerVideo.readyState >= 2 && bannerVideo.currentTime - t0 < 0.2) {
-            attachBannerVideo();
-          }
-        }, 1200);
       } catch (e) {}
     }
 
@@ -397,8 +354,8 @@
     }
     window._tryPlayBanner = tryPlayBanner;
 
-    // 观察横幅容器（视频可能不在文档里，靠容器判断曝光）
-    var observeTarget = bannerEl;
+    // 观察横幅容器而不是 1px 的 video，否则 intersection 算不准
+    var observeTarget = bannerEl || bannerVideo;
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         function (entries) {
@@ -438,9 +395,11 @@
     document.addEventListener("pointerdown", kickOnGesture, { passive: true });
 
     // 长按空白处也别弹「保存视频」系统菜单
-    bannerEl.addEventListener("contextmenu", function (e) {
-      e.preventDefault();
-    });
+    if (bannerEl) {
+      bannerEl.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+    }
   }
 
   /* ---------- 横幅粒子拼字（仿 mimo）----------
@@ -453,8 +412,7 @@
     // 这个画布只画不读像素，别开 willReadFrequently——那会把 GPU 加速关掉、强制 CPU 渲染，很卡
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
-    // 视频由上面的横幅逻辑建在内存里（detached），这里直接用同一个对象
-    var vidEl = window._bannerVideo || document.querySelector(".hero-banner-video");
+    var vidEl = document.querySelector(".hero-banner-video");
 
     // 视频帧缓存：主画布每帧都要 clearRect，如果这一帧不重画视频，画面就被擦没了。
     // 所以视频只在「换帧」时缩放进这张离屏缓存（1080p 缩放很贵，省下来），
