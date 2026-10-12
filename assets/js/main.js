@@ -328,37 +328,43 @@
   }
   runHeroTyping();
 
-  /* ---------- 横幅背景动图：文字打完 + 滑到横幅才播 ----------
-     背景是一张动图（<img>）垫在粒子 canvas 底下，不是 <video>。
-     为什么不用视频：小米等手机浏览器会把「正在播的 <video>」强制抬到所有内容之上，
-     透明度和层级都压不住，粒子直接被盖掉；<img> 动图不会被强制置顶，各浏览器表现一致。
+  /* ---------- 横幅背景动画：文字打完 + 滑到横幅才播 ----------
+     背景帧来自一张雪碧图（videos/hero-banner-sprite.webp），由下面的粒子画布取帧铺底。
+     不用 <video>：小米等手机浏览器会把「正在播的 <video>」强制抬到所有内容之上，
+     粒子直接被盖掉。也不用 <img> 动图：浏览器每个动画帧都要现解码，和粒子抢 CPU 会卡。
+     雪碧图只解码一次，之后换帧就是一次 drawImage 裁剪，开销很小。
      行为：进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
-     之后每次滑到横幅都重播一遍，播完停在最后一帧（文件里 loop=1，只播一次）。
-     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。 */
+     播完停在最后一帧，不循环；每次重新进入横幅都从头播一遍。
+     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
+     换背景：重做一张雪碧图覆盖 videos/hero-banner-sprite.webp，并改下面的 count/cols/rows。 */
   var bannerEl = document.querySelector(".hero-banner");
-  var bannerImg = null;
-  var bannerSrc = "videos/hero-banner.webp";
   var bannerInView = false;
+  // 雪碧图排布：6 列 × 7 行，帧序号从 0 开始、先列后行
+  var bannerPlayback = {
+    src: "videos/hero-banner-sprite.webp",
+    fps: 10,
+    count: 41,
+    cols: 6,
+    rows: 7,
+    sprite: null,
+    ready: false,
+    index: 0,
+    playing: false,
+    hasPlayed: false,
+    startedAt: 0
+  };
+  window._bannerPlayback = bannerPlayback;
 
   function replayBanner() {
-    if (!bannerEl || reduceMotion) return;
-    // 重建 <img> 是最稳的「从头播」：同一个 src 再赋值一次，多数内核不会重播。
-    // 图走缓存，重建节点不会重新下载。
-    if (bannerImg && bannerImg.parentNode) {
-      bannerImg.parentNode.removeChild(bannerImg);
-    }
-    bannerImg = document.createElement("img");
-    bannerImg.className = "hero-banner-bg";
-    bannerImg.alt = "";
-    bannerImg.setAttribute("aria-hidden", "true");
-    bannerImg.src = bannerSrc;
-    bannerEl.insertBefore(bannerImg, bannerEl.firstChild);
+    if (reduceMotion || !bannerPlayback.ready) return;
+    bannerPlayback.index = 0;
+    bannerPlayback.playing = true;
+    bannerPlayback.hasPlayed = true;
+    bannerPlayback.startedAt = performance.now();
   }
 
   function stopBanner() {
-    if (bannerImg && bannerImg.parentNode) {
-      bannerImg.parentNode.removeChild(bannerImg);
-    }
+    bannerPlayback.playing = false;
   }
 
   // 满足「打字完 + 在视野里」才播；打字收尾时会调到这里
@@ -367,11 +373,18 @@
   }
   window._tryPlayBanner = tryPlayBanner;
 
-  if (bannerEl) {
-    // 提前缓存动图，打字一结束就能立刻开播
-    var bannerPreload = new Image();
-    bannerPreload.src = bannerSrc;
+  // 提前加载雪碧图，打字一结束就能立刻开播
+  (function loadBannerSprite() {
+    var img = new Image();
+    img.onload = function () {
+      bannerPlayback.sprite = img;
+      bannerPlayback.ready = true;
+      tryPlayBanner();
+    };
+    img.src = bannerPlayback.src;
+  })();
 
+  if (bannerEl) {
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         function (entries) {
@@ -412,6 +425,15 @@
     // 这个画布只画不读像素，别开 willReadFrequently——那会把 GPU 加速关掉、强制 CPU 渲染，很卡
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
+
+    // 背景帧缓存：主画布每帧都要 clearRect，如果这一帧不重画背景，画面就被擦没了。
+    // 背景只在「换帧」时缩放进这张离屏缓存（缩放很贵，省下来），
+    // 之后每帧把缓存整张贴回主画布。播完停住不动，缓存就一直撑着末帧。
+    var vcache = document.createElement("canvas");
+    var vctx = vcache.getContext("2d");
+    var cacheReady = false;
+    var lastDrawIndex = -1;
+
     // 横幅里拼出的字，想换就改这一行
     var TEXT = "Zhouhu Tan";
     // 粒子主色：深墨 + 橙色渐变（取自主题）
@@ -452,6 +474,13 @@
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // 背景缓存跟主画布同尺寸（设备像素），贴回去时 1:1 不糊
+      vcache.width = canvas.width;
+      vcache.height = canvas.height;
+      if (vctx) vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cacheReady = false;
+      lastDrawIndex = -1;
 
       // 量字号：clamp(4rem, 13vw, 10rem)，跟 mimo 一个套路
       var probe = document.createElement("span");
@@ -549,10 +578,53 @@
       entering = true;
     }
 
+    // 把雪碧图当前帧按 object-fit:cover 缩进离屏缓存（贵，只在换帧时做）
+    function captureBannerFrame(bp) {
+      if (!vctx || !bp || !bp.sprite) return;
+      var fw = bp.sprite.naturalWidth / bp.cols;
+      var fh = bp.sprite.naturalHeight / bp.rows;
+      var col = bp.index % bp.cols;
+      var row = Math.floor(bp.index / bp.cols);
+      var scale = Math.max(W / fw, H / fh);
+      var dw = fw * scale, dh = fh * scale;
+      vctx.clearRect(0, 0, W, H);
+      try {
+        vctx.drawImage(
+          bp.sprite,
+          col * fw, row * fh, fw, fh,
+          (W - dw) / 2, (H - dh) / 2, dw, dh
+        );
+        cacheReady = true;
+      } catch (e) {
+        cacheReady = false;
+      }
+    }
+
     function frame(now) {
       // 横幅滚出视野就停掉整条循环，回来再 kick() 续上，省电也省得后台空转
       if (!visible) { rafId = 0; return; }
       ctx.clearRect(0, 0, W, H);
+
+      // 背景帧推进：播到最后一帧就停住。没播过就不铺背景，保持透明底。
+      var bp = window._bannerPlayback;
+      if (bp && bp.ready && (bp.playing || bp.hasPlayed)) {
+        if (bp.playing) {
+          var idx = Math.floor((now - bp.startedAt) / (1000 / bp.fps));
+          if (idx < 0) idx = 0;
+          if (idx >= bp.count) {
+            idx = bp.count - 1;
+            bp.playing = false;
+          }
+          bp.index = idx;
+        }
+        // 帧变了才重新缩放进缓存，其余时候把缓存贴回去即可；
+        // 这样既不浪费，也不会因为「这帧没重画」而被 clearRect 擦成空白。
+        if (bp.index !== lastDrawIndex) {
+          captureBannerFrame(bp);
+          lastDrawIndex = bp.index;
+        }
+      }
+      if (cacheReady) ctx.drawImage(vcache, 0, 0, W, H);
 
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
       var rect = wrap.getBoundingClientRect();

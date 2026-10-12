@@ -454,22 +454,9 @@ html[data-js] .hero-banner-wrap.is-in {
   -webkit-user-select: none;
 }
 
-/* 背景动图垫在粒子 canvas 底下。
+/* 背景由 canvas 从雪碧图取帧铺底（见 main.js），不需要额外的图层元素。
    为什么不用 <video>：小米等手机浏览器会把「正在播的 video」强制抬到所有内容
-   之上，透明度和层级都压不住，粒子直接被盖掉；<img> 动图不会被强制置顶。 */
-.hero-banner-bg {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
-  border: 0;
-  -webkit-user-drag: none;
-  user-drag: none;
-}
+   之上，透明度和层级都压不住，粒子直接被盖掉。 */
 
 .hero-banner-canvas {
   position: absolute;
