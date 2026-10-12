@@ -149,21 +149,12 @@
       <!-- 大横幅：背景视频 + 粒子拼成的名字
            视频行为：滑到横幅才开始播（进页不自动播），每次进入视野从头播一遍，停在最后一帧
            换视频：把新 mp4 覆盖 videos/hero-banner-v5.mp4 即可（保持文件名最省事）
-           视频只留一个小角块供 canvas 取帧，画面由 canvas 合成（细节见 main.css）
+           画面由 canvas 取帧合成，取帧用的视频元素贴在屏幕右下角（见文档末尾）
            粒子拼的字：去 assets/js/main.js 搜 var TEXT 改那一行
            粒子颜色：同一处的 COLOR_A / COLOR_B，深浅色模式各一组
            下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
-          <!-- 视频缩成小角块只给 canvas 取帧，手机就不会弹原生播放器/下载菜单 -->
-          <video class="hero-banner-video" muted playsinline webkit-playsinline
-                 preload="auto" aria-hidden="true"
-                 controlsList="nodownload nofullscreen noremoteplayback"
-                 disablePictureInPicture disableRemotePlayback
-                 x5-video-player-type="h5-page"
-                 x5-video-player-fullscreen="false">
-            <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
-          </video>
           <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>
           <a class="hero-banner-btn" href="#research">
             <span data-zh="探索&nbsp;研究">Explore&nbsp;Research</span>
@@ -438,6 +429,19 @@
       <a class="footer-top" href="#hero" data-zh="回到顶部">Back to top</a>
     </div>
   </footer>
+
+  <!-- 横幅取帧用的视频：贴屏幕右下角的小块，画面本身不上屏（由 canvas 合成）。
+       别放回横幅里、也别挪出屏幕：小米等浏览器会把正在播的 <video> 强制浮到最上层，
+       元素在哪儿浮出来的画面就挡在哪儿；贴在屏幕角上，最多挡那里一小块。
+       别缩到 1px / display:none / 移出视口——浏览器判定看不见就不再解码，canvas 直接没画面。 -->
+  <video class="hero-banner-video" muted playsinline webkit-playsinline
+         preload="auto" aria-hidden="true"
+         controlsList="nodownload nofullscreen noremoteplayback"
+         disablePictureInPicture disableRemotePlayback
+         x5-video-player-type="h5-page"
+         x5-video-player-fullscreen="false">
+    <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
+  </video>
 
   <script src="assets/js/main.js"></script>
 </body>

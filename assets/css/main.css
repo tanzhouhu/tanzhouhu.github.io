@@ -454,20 +454,23 @@ html[data-js] .hero-banner-wrap.is-in {
   -webkit-user-select: none;
 }
 
-/* 视频只留一个小角块：保证浏览器持续解码出帧，又尽量少挡画面。
-   画面由 canvas 取帧合成——drawImage 用的是 videoWidth×videoHeight 的完整帧，
+/* 取帧视频：贴屏幕右下角的小块，只给 canvas 出帧，画面本身不上屏。
+   画面由 canvas 合成——drawImage 用的是 videoWidth×videoHeight 的完整帧，
    元素显示成多大不影响画质。
-   小米等手机浏览器会把正在播的 <video> 抬到所有内容之上，透明度和层级都压不住：
-   元素越大被抬上来挡得越多，缩成小角块后最多挡右上角一小块。
-   注意：别把视频挪到屏幕外（left:-9999px）或用 display:none / 1px 缩起来——
+   小米等手机浏览器会把正在播的 <video> 抬到所有内容之上，透明度和层级都压不住，
+   元素在哪儿浮出来的画面就挡在哪儿：所以贴到屏幕右下角，不在横幅里，
+   就算被抬上来也只挡角落一小块，不盖横幅上的名字和按钮。
+   注意：别把视频挪出视口（left:-9999px）或用 display:none / 1px 缩起来——
    浏览器会判定「这个视频看不见」就不再解码，canvas 直接没画面。
-   opacity 用 0.01 而不是 0：QQ（X5 内核）会把完全透明的视频当看不见、拒绝出帧。 */
+   opacity 用 0.01 而不是 0：QQ（X5 内核）会把完全透明的视频当看不见、拒绝出帧。
+   贴在 body 末尾（不在 .hero-banner 里）：那里没有 transform 祖先，
+   position:fixed 才真正相对屏幕定位。 */
 .hero-banner-video {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  width: 96px;
-  height: 54px;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 32px;
+  height: 18px;
   opacity: 0.01;
   pointer-events: none;
   border: 0;
