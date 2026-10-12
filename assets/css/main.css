@@ -448,24 +448,23 @@ html[data-js] .hero-banner-wrap.is-in {
   border: 1px solid var(--hair);
   /* 手指划着推粒子时别让浏览器先判定滚动，左右立刻跟手；上下仍可滚页面 */
   touch-action: pan-y;
-  /* 长按视频弹「保存/下载」的系统菜单 */
+  /* 长按背景图弹「保存/下载」的系统菜单 */
   -webkit-touch-callout: none;
   user-select: none;
   -webkit-user-select: none;
 }
 
-/* 视频不直接上屏：铺满但完全透明，画面由 canvas 取帧合成。
-   注意：别把视频挪到屏幕外（left:-9999px）或用 display:none / 1px 缩起来——
-   浏览器会判定「这个视频看不见」就不再解码/播放，canvas 直接没画面。
-   保持铺满 + opacity:0 是最稳的：既正常播放取帧，又尽量不显眼。 */
-.hero-banner-video {
+/* 背景动图垫在粒子 canvas 底下。
+   为什么不用 <video>：小米等手机浏览器会把「正在播的 video」强制抬到所有内容
+   之上，透明度和层级都压不住，粒子直接被盖掉；<img> 动图不会被强制置顶。 */
+.hero-banner-bg {
   position: absolute;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0;
+  z-index: 0;
   pointer-events: none;
   border: 0;
   -webkit-user-drag: none;

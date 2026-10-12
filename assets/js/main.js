@@ -328,94 +328,78 @@
   }
   runHeroTyping();
 
-  /* ---------- 横幅视频：文字打完 + 滑到横幅才播 ----------
-     进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
-     之后每次滑到横幅都重播一遍，播完停在最后一帧，不循环。
-     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
-     视频本身透明藏在横幅里，画面由粒子 canvas 每帧 drawImage 合成——
-     手机浏览器会把 <video> 强制抬到最上层，所以得靠 CSS 尽量藏。 */
-  var bannerVideo = document.querySelector(".hero-banner-video");
+  /* ---------- 横幅背景动图：文字打完 + 滑到横幅才播 ----------
+     背景是一张动图（<img>）垫在粒子 canvas 底下，不是 <video>。
+     为什么不用视频：小米等手机浏览器会把「正在播的 <video>」强制抬到所有内容之上，
+     透明度和层级都压不住，粒子直接被盖掉；<img> 动图不会被强制置顶，各浏览器表现一致。
+     行为：进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
+     之后每次滑到横幅都重播一遍，播完停在最后一帧（文件里 loop=1，只播一次）。
+     想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。 */
   var bannerEl = document.querySelector(".hero-banner");
-  // 小米自带浏览器（MiuiBrowser）会把正在播的 <video> 强制抬到所有内容之上，
-  // opacity / z-index 都压不住，粒子直接被盖掉。这种内核干脆不播视频，只留粒子。
-  // 以后再遇到同类强制置顶的内核，往这个列表里加 UA 特征即可。
-  if (bannerVideo && /MiuiBrowser/i.test(navigator.userAgent || "")) {
-    if (bannerVideo.parentNode) bannerVideo.parentNode.removeChild(bannerVideo);
-    bannerVideo = null;
-  }
-  // QQ 浏览器（X5 内核）可能把 opacity:0 的视频当成「看不见」而拒绝解码。
-  // 抬到 0.01 让它判定为可见并正常出帧；画面本身被 canvas 画满，肉眼看不到这层。
-  if (bannerVideo && /MQQBrowser/i.test(navigator.userAgent || "")) {
-    bannerVideo.style.opacity = "0.01";
-  }
-  if (bannerVideo) {
-    bannerVideo.loop = false;
-    var videoInView = false;
+  var bannerImg = null;
+  var bannerSrc = "videos/hero-banner.webp";
+  var bannerInView = false;
 
-    function replayBanner() {
-      try {
-        bannerVideo.currentTime = 0;
-        var p = bannerVideo.play();
-        if (p && p.catch) p.catch(function () {});
-      } catch (e) {}
+  function replayBanner() {
+    if (!bannerEl || reduceMotion) return;
+    // 重建 <img> 是最稳的「从头播」：同一个 src 再赋值一次，多数内核不会重播。
+    // 图走缓存，重建节点不会重新下载。
+    if (bannerImg && bannerImg.parentNode) {
+      bannerImg.parentNode.removeChild(bannerImg);
     }
+    bannerImg = document.createElement("img");
+    bannerImg.className = "hero-banner-bg";
+    bannerImg.alt = "";
+    bannerImg.setAttribute("aria-hidden", "true");
+    bannerImg.src = bannerSrc;
+    bannerEl.insertBefore(bannerImg, bannerEl.firstChild);
+  }
 
-    // 满足「打字完 + 在视野里」才播；打字收尾时会调到这里
-    function tryPlayBanner() {
-      if (videoInView && heroTypingDone && !reduceMotion) replayBanner();
+  function stopBanner() {
+    if (bannerImg && bannerImg.parentNode) {
+      bannerImg.parentNode.removeChild(bannerImg);
     }
-    window._tryPlayBanner = tryPlayBanner;
+  }
 
-    // 观察横幅容器而不是 1px 的 video，否则 intersection 算不准
-    var observeTarget = bannerEl || bannerVideo;
+  // 满足「打字完 + 在视野里」才播；打字收尾时会调到这里
+  function tryPlayBanner() {
+    if (bannerInView && heroTypingDone && !reduceMotion) replayBanner();
+  }
+  window._tryPlayBanner = tryPlayBanner;
+
+  if (bannerEl) {
+    // 提前缓存动图，打字一结束就能立刻开播
+    var bannerPreload = new Image();
+    bannerPreload.src = bannerSrc;
+
     if ("IntersectionObserver" in window) {
       new IntersectionObserver(
         function (entries) {
           entries.forEach(function (entry) {
             var arrived = entry.isIntersecting && entry.intersectionRatio >= 0.3;
-            if (arrived && !videoInView) {
-              videoInView = true;
+            if (arrived && !bannerInView) {
+              bannerInView = true;
               tryPlayBanner();
-            } else if (!arrived && videoInView) {
-              videoInView = false;
-              bannerVideo.pause();
+            } else if (!arrived && bannerInView) {
+              bannerInView = false;
+              stopBanner();
             }
           });
         },
         { threshold: [0, 0.3] }
-      ).observe(observeTarget);
+      ).observe(bannerEl);
+    } else {
+      bannerInView = true;
+      tryPlayBanner();
     }
 
     document.addEventListener("visibilitychange", function () {
       if (document.hidden) {
-        bannerVideo.pause();
+        stopBanner();
       } else {
         tryPlayBanner();
       }
     });
-
-    // 手机浏览器可能拦掉自动播：用户一碰屏幕就补播一次。
-    // 注意：打字还没结束时不能摘监听——早先的实现第一次碰屏幕就把监听删了，
-    // 那次补播被 heroTypingDone 挡掉，之后视频永远起不来（QQ 浏览器就是这么没视频的）。
-    // 播完（ended）也不再重播，免得用户碰一下又从头放。
-    function kickOnGesture() {
-      if (!heroTypingDone) return;
-      if (bannerVideo.paused && !bannerVideo.ended) {
-        videoInView = true;
-        tryPlayBanner();
-      }
-      document.removeEventListener("touchstart", kickOnGesture);
-      document.removeEventListener("pointerdown", kickOnGesture);
-    }
-    document.addEventListener("touchstart", kickOnGesture, { passive: true });
-    document.addEventListener("pointerdown", kickOnGesture, { passive: true });
-
-    // 长按空白处也别弹「保存视频」系统菜单
-    if (bannerEl) {
-      bannerEl.addEventListener("contextmenu", function (e) {
-        e.preventDefault();
-      });
-    }
   }
 
   /* ---------- 横幅粒子拼字（仿 mimo）----------
@@ -428,15 +412,6 @@
     // 这个画布只画不读像素，别开 willReadFrequently——那会把 GPU 加速关掉、强制 CPU 渲染，很卡
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
-    var vidEl = document.querySelector(".hero-banner-video");
-
-    // 视频帧缓存：主画布每帧都要 clearRect，如果这一帧不重画视频，画面就被擦没了。
-    // 所以视频只在「换帧」时缩放进这张离屏缓存（1080p 缩放很贵，省下来），
-    // 之后每帧把缓存整张贴回主画布。视频放完停住不动，缓存就一直撑着末帧。
-    var vcache = document.createElement("canvas");
-    var vctx = vcache.getContext("2d");
-    var cacheReady = false;
-
     // 横幅里拼出的字，想换就改这一行
     var TEXT = "Zhouhu Tan";
     // 粒子主色：深墨 + 橙色渐变（取自主题）
@@ -459,8 +434,7 @@
     var startTime = 0;
     var entering = true;
     var rafId = 0;
-    // 视频当前画到第几秒那一帧，用来跳过重复取帧；visible 为假时整条 rAF 停掉省电
-    var lastDrawTime = -1;
+    // visible 为假时整条 rAF 停掉省电
     var visible = true;
 
     function clamp(v, lo, hi) { return Math.min(Math.max(v, lo), hi); }
@@ -478,13 +452,6 @@
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // 视频缓存跟主画布同尺寸（设备像素），贴回去时 1:1 不糊
-      vcache.width = canvas.width;
-      vcache.height = canvas.height;
-      if (vctx) vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cacheReady = false;
-      lastDrawTime = -1;
 
       // 量字号：clamp(4rem, 13vw, 10rem)，跟 mimo 一个套路
       var probe = document.createElement("span");
@@ -582,34 +549,11 @@
       entering = true;
     }
 
-    // 把视频当前帧按 object-fit:cover 缩进离屏缓存（贵，只在换帧时做）
-    function captureVideoFrame() {
-      if (!vctx || !vidEl || vidEl.readyState < 2 || !vidEl.videoWidth) return;
-      var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
-      var scale = Math.max(W / vw, H / vh);
-      var dw = vw * scale, dh = vh * scale;
-      vctx.clearRect(0, 0, W, H);
-      try {
-        vctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
-        cacheReady = true;
-      } catch (e) {
-        cacheReady = false;
-      }
-    }
-
     function frame(now) {
       // 横幅滚出视野就停掉整条循环，回来再 kick() 续上，省电也省得后台空转
       if (!visible) { rafId = 0; return; }
       ctx.clearRect(0, 0, W, H);
 
-      // 视频帧变了才重新缩放进缓存（1080p 缩放很贵），其余时候把缓存贴回去即可；
-      // 这样既不浪费，也不会因为「这帧没重画」而被 clearRect 擦成空白。
-      if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0 &&
-          vidEl.currentTime !== lastDrawTime) {
-        captureVideoFrame();
-        lastDrawTime = vidEl.currentTime;
-      }
-      if (cacheReady) ctx.drawImage(vcache, 0, 0, W, H);
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
       var rect = wrap.getBoundingClientRect();
       mouse.x = mouse.cx - rect.left;
