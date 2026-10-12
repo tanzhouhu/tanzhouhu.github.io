@@ -339,13 +339,13 @@
      换背景：重做一张雪碧图覆盖 videos/hero-banner-sprite.webp，并改下面的 count/cols/rows。 */
   var bannerEl = document.querySelector(".hero-banner");
   var bannerInView = false;
-  // 雪碧图排布：6 列 × 7 行，帧序号从 0 开始、先列后行
+  // 雪碧图排布：7 列 × 14 行，帧序号从 0 开始、先列后行
   var bannerPlayback = {
     src: "videos/hero-banner-sprite.webp",
-    fps: 10,
-    count: 41,
-    cols: 6,
-    rows: 7,
+    fps: 24,
+    count: 98,
+    cols: 7,
+    rows: 14,
     sprite: null,
     ready: false,
     index: 0,
