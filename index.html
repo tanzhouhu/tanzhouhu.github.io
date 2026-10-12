@@ -10,8 +10,8 @@
   3. 换头像：把新照片覆盖 images/profile.jpg（建议 1200×900 横图）
   4. 改配色/字号：assets/css/main.css 最顶上的 :root 变量
   5. 时间写法：用 Now / Freshman year / Present 这类相对表述
-  6. 换横幅背景：覆盖 videos/hero-banner-sprite.webp（雪碧图，几秒的短片抽成帧拼成，
-     只播一次；原始素材在 videos/hero-banner-v5.mp4）
+  6. 换横幅视频：覆盖 videos/hero-banner-v5.mp4（mp4 格式，建议 1920×1080，几秒的短片，
+     每次滚动到横幅会从头播一次然后停在最后一帧，不要加 loop）
      横幅上粒子拼的名字在 assets/js/main.js 搜 TEXT 就能改
   7. 换手绘图案：images/doodles/ 里四个 svg（羽毛/流星/土星/星系），
      换图就替换同名文件，或改条目里 <img src="images/doodles/xxx.svg">
@@ -146,14 +146,24 @@
         </div>
       </div>
 
-      <!-- 大横幅：背景动画 + 粒子拼成的名字（两者都在同一块 canvas 里）
-           背景行为：滑到横幅才开始播（进页不自动播），每次进入视野从头播一遍，停在最后一帧
-           换背景：重做雪碧图覆盖 videos/hero-banner-sprite.webp（原始素材 videos/hero-banner-v5.mp4）
+      <!-- 大横幅：背景视频 + 粒子拼成的名字
+           视频行为：滑到横幅才开始播（进页不自动播），每次进入视野从头播一遍，停在最后一帧
+           换视频：把新 mp4 覆盖 videos/hero-banner-v5.mp4 即可（保持文件名最省事）
+           视频只留一个小角块供 canvas 取帧，画面由 canvas 合成（细节见 main.css）
            粒子拼的字：去 assets/js/main.js 搜 var TEXT 改那一行
            粒子颜色：同一处的 COLOR_A / COLOR_B，深浅色模式各一组
            下面 canvas 和按钮不要删 -->
       <div class="hero-banner-wrap">
         <div class="hero-banner">
+          <!-- 视频缩成小角块只给 canvas 取帧，手机就不会弹原生播放器/下载菜单 -->
+          <video class="hero-banner-video" muted playsinline webkit-playsinline
+                 preload="auto" aria-hidden="true"
+                 controlsList="nodownload nofullscreen noremoteplayback"
+                 disablePictureInPicture disableRemotePlayback
+                 x5-video-player-type="h5-page"
+                 x5-video-player-fullscreen="false">
+            <source src="videos/hero-banner-v5.mp4" type="video/mp4" />
+          </video>
           <canvas class="hero-banner-canvas" id="heroParticles" aria-hidden="true"></canvas>
           <a class="hero-banner-btn" href="#research">
             <span data-zh="探索&nbsp;研究">Explore&nbsp;Research</span>

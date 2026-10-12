@@ -454,9 +454,26 @@ html[data-js] .hero-banner-wrap.is-in {
   -webkit-user-select: none;
 }
 
-/* 背景由 canvas 从雪碧图取帧铺底（见 main.js），不需要额外的图层元素。
-   为什么不用 <video>：小米等手机浏览器会把「正在播的 video」强制抬到所有内容
-   之上，透明度和层级都压不住，粒子直接被盖掉。 */
+/* 视频只留一个小角块：保证浏览器持续解码出帧，又尽量少挡画面。
+   画面由 canvas 取帧合成——drawImage 用的是 videoWidth×videoHeight 的完整帧，
+   元素显示成多大不影响画质。
+   小米等手机浏览器会把正在播的 <video> 抬到所有内容之上，透明度和层级都压不住：
+   元素越大被抬上来挡得越多，缩成小角块后最多挡右上角一小块。
+   注意：别把视频挪到屏幕外（left:-9999px）或用 display:none / 1px 缩起来——
+   浏览器会判定「这个视频看不见」就不再解码，canvas 直接没画面。
+   opacity 用 0.01 而不是 0：QQ（X5 内核）会把完全透明的视频当看不见、拒绝出帧。 */
+.hero-banner-video {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 96px;
+  height: 54px;
+  opacity: 0.01;
+  pointer-events: none;
+  border: 0;
+  -webkit-user-drag: none;
+  user-drag: none;
+}
 
 .hero-banner-canvas {
   position: absolute;
