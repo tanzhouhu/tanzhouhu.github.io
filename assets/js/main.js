@@ -328,16 +328,11 @@
   }
   runHeroTyping();
 
-  /* ---------- 横幅背景动画：文字打完 + 滑到横幅才播 ----------
-     背景用原始 mp4（videos/hero-banner-v5.mp4），由下面的粒子画布取帧铺底，
-     画质和流畅度跟视频本身一致。drawImage 取的是 videoWidth×videoHeight 的完整帧，
-     和 <video> 元素在页面上显示成多大没有关系。
-     取帧用的视频贴在屏幕右下角（body 末尾的小块），画面全部由 canvas 合成：
+  /* ---------- 横幅背景视频：文字打完 + 滑到横幅才播 ----------
+     背景用原始 mp4（videos/hero-banner-v5.mp4），在横幅里铺满直接播，
+     画质和流畅度跟视频本身一致；粒子 canvas 透明叠在视频上层。
      小米等手机浏览器会把「正在播的 <video>」强制抬到所有内容之上，透明度和层级都压不住，
-     元素在哪儿浮出来的画面就挡在哪儿；所以不放横幅里，贴屏幕角上，最多挡那里一小块。
-     注意：别把视频挪出视口（left:-9999px）或用 display:none / 1px 缩起来——
-     浏览器会判定「这个视频看不见」就不再解码，canvas 直接没画面。
-     角块用 opacity:0.01 而不是 0：QQ（X5 内核）会把完全透明的视频当看不见、拒绝出帧。
+     所以小米上粒子会被视频盖住——系统行为压不住；其他浏览器视频和粒子都能看到。
      行为：进页面不自动播；等首屏打字结束、且横幅滚进视野（露出 30%）才从头播。
      播完停在最后一帧，不循环；每次重新进入横幅都从头播一遍。
      想改触发灵敏度：threshold 的 0.3 表示露出 30% 才算「到了」。
@@ -427,16 +422,6 @@
     var ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    var vidEl = document.querySelector(".hero-banner-video");
-
-    // 视频帧缓存：主画布每帧都要 clearRect，如果这一帧不重画视频，画面就被擦没了。
-    // 所以视频只在「换帧」时缩放进这张离屏缓存（1080p 缩放很贵，省下来），
-    // 之后每帧把缓存整张贴回主画布。视频放完停住不动，缓存就一直撑着末帧。
-    var vcache = document.createElement("canvas");
-    var vctx = vcache.getContext("2d");
-    var cacheReady = false;
-    var lastDrawTime = -1;
-
     // 横幅里拼出的字，想换就改这一行
     var TEXT = "Zhouhu Tan";
     // 粒子主色：深墨 + 橙色渐变（取自主题）
@@ -477,13 +462,6 @@
       canvas.style.width = "100%";
       canvas.style.height = "100%";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      // 背景缓存跟主画布同尺寸（设备像素），贴回去时 1:1 不糊
-      vcache.width = canvas.width;
-      vcache.height = canvas.height;
-      if (vctx) vctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cacheReady = false;
-      lastDrawTime = -1;
 
       // 量字号：clamp(4rem, 13vw, 10rem)，跟 mimo 一个套路
       var probe = document.createElement("span");
@@ -581,35 +559,11 @@
       entering = true;
     }
 
-    // 把视频当前帧按 object-fit:cover 缩进离屏缓存（贵，只在换帧时做）
-    // drawImage 用的是 videoWidth×videoHeight 的完整帧，元素显示成小角块不影响画质
-    function captureVideoFrame() {
-      if (!vctx || !vidEl || vidEl.readyState < 2 || !vidEl.videoWidth) return;
-      var vw = vidEl.videoWidth, vh = vidEl.videoHeight;
-      var scale = Math.max(W / vw, H / vh);
-      var dw = vw * scale, dh = vh * scale;
-      vctx.clearRect(0, 0, W, H);
-      try {
-        vctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
-        cacheReady = true;
-      } catch (e) {
-        cacheReady = false;
-      }
-    }
-
     function frame(now) {
       // 横幅滚出视野就停掉整条循环，回来再 kick() 续上，省电也省得后台空转
       if (!visible) { rafId = 0; return; }
+      // 画布只画粒子、保持透明，视频在下层自己播，透出来就是背景
       ctx.clearRect(0, 0, W, H);
-
-      // 视频帧变了才重新缩放进缓存（1080p 缩放很贵），其余时候把缓存贴回去即可；
-      // 这样既不浪费，也不会因为「这帧没重画」而被 clearRect 擦成空白。
-      if (vidEl && vidEl.readyState >= 2 && vidEl.videoWidth > 0 &&
-          vidEl.currentTime !== lastDrawTime) {
-        captureVideoFrame();
-        lastDrawTime = vidEl.currentTime;
-      }
-      if (cacheReady) ctx.drawImage(vcache, 0, 0, W, H);
 
       // 屏幕坐标 → 横幅内坐标：放在帧里换算，手指快速划过事件稀疏也不会算旧位置
       var rect = wrap.getBoundingClientRect();
